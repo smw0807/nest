@@ -2,6 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import * as cheerio from 'cheerio';
+import { OKKY_COMMUNITY_URL } from '../constants/url';
 
 @Injectable()
 export class CommunityService {
@@ -9,10 +10,9 @@ export class CommunityService {
   constructor(private readonly httpService: HttpService) {}
 
   async crawl() {
-    const url = 'https://okky.kr/community/';
     try {
       const { data } = await firstValueFrom(
-        this.httpService.get(url, { responseType: 'text' }),
+        this.httpService.get(OKKY_COMMUNITY_URL, { responseType: 'text' }),
       );
       const $ = cheerio.load(data);
 
