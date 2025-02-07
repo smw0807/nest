@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { LoginService } from './login.service';
 import { ConfigModule } from 'src/config/config.module';
 @Module({
   imports: [ConfigModule],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [LoginService],
+  exports: [LoginService],
 })
-export class AuthModule {}
+export class LoginModule {}

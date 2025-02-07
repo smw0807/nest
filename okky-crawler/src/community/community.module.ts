@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { CommunityController } from './community.controller';
 import { CommunityService } from './community.service';
 import { HttpModule } from '@nestjs/axios';
-import { AuthModule } from 'src/auth/auth.module';
+import { LoginModule } from 'src/login/login.module';
 
 @Module({
-  imports: [HttpModule, AuthModule],
+  imports: [HttpModule, LoginModule],
   controllers: [CommunityController],
   providers: [CommunityService],
 })
