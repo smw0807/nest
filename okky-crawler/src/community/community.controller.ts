@@ -1,21 +1,21 @@
 import { Controller, Get, Logger, Res } from '@nestjs/common';
 import { CommunityService } from './community.service';
 import { Response } from 'express';
-import { AuthService } from 'src/auth/auth.service';
+import { LoginService } from 'src/login/login.service';
 
 @Controller('community')
 export class CommunityController {
   private readonly logger = new Logger(CommunityController.name);
   constructor(
     private readonly communityService: CommunityService,
-    private readonly authService: AuthService,
+    private readonly loginService: LoginService,
   ) {}
 
   @Get()
   async getCommunity(@Res() res: Response) {
     try {
-      await this.authService.login();
-      await this.communityService.crawl();
+      const page = await this.loginService.login();
+      await this.communityService.crawl(page);
       res.send('success');
     } catch (e) {
       this.logger.error('커뮤니티 크롤링 중 에러 발생', e);
