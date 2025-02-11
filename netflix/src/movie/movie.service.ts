@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateMovieDto, UpdateMovieDto } from './dto/create-movie.dto';
 
 /**
  * @Injectable() 이란
@@ -63,7 +64,7 @@ export class MovieService {
     return movie;
   }
 
-  createMovie(movie: Movie) {
+  createMovie(movie: CreateMovieDto) {
     const newMovie = {
       id: this.idCounter++,
       ...movie,
@@ -72,7 +73,7 @@ export class MovieService {
     return newMovie;
   }
 
-  updateMovie(id: number, movie: Movie) {
+  updateMovie(id: number, movie: UpdateMovieDto) {
     const movieIndex = this.movies.findIndex((movie) => movie.id === +id);
     if (movieIndex === -1) {
       throw new NotFoundException('존재하지 않는 ID의 영화입니다.');
