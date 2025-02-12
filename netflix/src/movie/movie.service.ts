@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
+import { Movie } from './entity/movie.entity';
 
 /**
  * @Injectable() 이란
@@ -12,16 +13,7 @@ import { UpdateMovieDto } from './dto/update-movie.dto';
  * 모든 서비스 클래스는 IoC 컨테이너에 등록되어야 한다.
  * 이 컨테이너는 서비스 클래스의 인스턴스를 생성하고, 관리한다.
  */
-export interface Movie {
-  id?: number;
-  name: string;
-  description: string;
-  rating: number;
-  year: number;
-  genre: string;
-  director: string;
-  cast: string[];
-}
+
 @Injectable()
 export class MovieService {
   private movies: Movie[] = [
