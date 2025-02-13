@@ -6,5 +6,5 @@ export class Movie {
   year: number;
   genre: string;
   director: string;
-  cast: string[];
+  actors: string[];
 }

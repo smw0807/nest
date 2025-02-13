@@ -57,7 +57,7 @@ export class UpdateMovieDto {
   director?: string;
   @IsOptional()
   @IsArray()
-  cast?: string[];
+  actors?: string[];
 
   // null || undefined 일 때 오류 발생
   // @IsDefined()

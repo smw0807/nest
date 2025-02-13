@@ -26,7 +26,7 @@ export class MovieService {
       year: 1994,
       genre: 'Drama',
       director: 'Frank Darabont',
-      cast: ['Tim Robbins', 'Morgan Freeman', 'Bob Gunton'],
+      actors: ['Tim Robbins', 'Morgan Freeman', 'Bob Gunton'],
     },
     {
       id: 2,
@@ -37,7 +37,7 @@ export class MovieService {
       year: 1972,
       genre: 'Crime, Drama',
       director: 'Francis Ford Coppola',
-      cast: ['Marlon Brando', 'Al Paccino', 'James Caan'],
+      actors: ['Marlon Brando', 'Al Paccino', 'James Caan'],
     },
   ];
   private idCounter = 3;
