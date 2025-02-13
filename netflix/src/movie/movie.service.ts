@@ -39,8 +39,30 @@ export class MovieService {
       director: 'Francis Ford Coppola',
       actors: ['Marlon Brando', 'Al Paccino', 'James Caan'],
     },
+    {
+      id: 3,
+      name: 'The Dark Knight',
+      description:
+        'When the menace known as the Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.',
+      rating: 9.0,
+      year: 2008,
+      genre: 'Action, Crime, Drama',
+      director: 'Christopher Nolan',
+      actors: ['Christian Bale', 'Heath Ledger', 'Aaron Eckhart'],
+    },
+    {
+      id: 4,
+      name: 'Pulp Fiction',
+      description:
+        'The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.',
+      rating: 8.9,
+      year: 1994,
+      genre: 'Crime, Drama',
+      director: 'Quentin Tarantino',
+      actors: ['John Travolta', 'Samuel L. Jackson', 'Uma Thurman'],
+    },
   ];
-  private idCounter = 3;
+  private idCounter = 4;
 
   getManyMovies(name: string) {
     if (!name) {
