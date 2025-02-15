@@ -17,50 +17,50 @@ import { Movie } from './entity/movie.entity';
 @Injectable()
 export class MovieService {
   private movies: Movie[] = [
-    {
-      id: 1,
-      name: 'The Shawshank Redemption',
-      description:
-        'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.',
-      rating: 9.3,
-      year: 1994,
-      genre: 'Drama',
-      director: 'Frank Darabont',
-      actors: ['Tim Robbins', 'Morgan Freeman', 'Bob Gunton'],
-    },
-    {
-      id: 2,
-      name: 'The Godfather',
-      description:
-        'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.',
-      rating: 9.2,
-      year: 1972,
-      genre: 'Crime, Drama',
-      director: 'Francis Ford Coppola',
-      actors: ['Marlon Brando', 'Al Paccino', 'James Caan'],
-    },
-    {
-      id: 3,
-      name: 'The Dark Knight',
-      description:
-        'When the menace known as the Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.',
-      rating: 9.0,
-      year: 2008,
-      genre: 'Action, Crime, Drama',
-      director: 'Christopher Nolan',
-      actors: ['Christian Bale', 'Heath Ledger', 'Aaron Eckhart'],
-    },
-    {
-      id: 4,
-      name: 'Pulp Fiction',
-      description:
-        'The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.',
-      rating: 8.9,
-      year: 1994,
-      genre: 'Crime, Drama',
-      director: 'Quentin Tarantino',
-      actors: ['John Travolta', 'Samuel L. Jackson', 'Uma Thurman'],
-    },
+    // {
+    //   id: 1,
+    //   name: 'The Shawshank Redemption',
+    //   description:
+    //     'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.',
+    //   rating: 9.3,
+    //   year: 1994,
+    //   genre: 'Drama',
+    //   director: 'Frank Darabont',
+    //   actors: ['Tim Robbins', 'Morgan Freeman', 'Bob Gunton'],
+    // },
+    // {
+    //   id: 2,
+    //   name: 'The Godfather',
+    //   description:
+    //     'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.',
+    //   rating: 9.2,
+    //   year: 1972,
+    //   genre: 'Crime, Drama',
+    //   director: 'Francis Ford Coppola',
+    //   actors: ['Marlon Brando', 'Al Paccino', 'James Caan'],
+    // },
+    // {
+    //   id: 3,
+    //   name: 'The Dark Knight',
+    //   description:
+    //     'When the menace known as the Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.',
+    //   rating: 9.0,
+    //   year: 2008,
+    //   genre: 'Action, Crime, Drama',
+    //   director: 'Christopher Nolan',
+    //   actors: ['Christian Bale', 'Heath Ledger', 'Aaron Eckhart'],
+    // },
+    // {
+    //   id: 4,
+    //   name: 'Pulp Fiction',
+    //   description:
+    //     'The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.',
+    //   rating: 8.9,
+    //   year: 1994,
+    //   genre: 'Crime, Drama',
+    //   director: 'Quentin Tarantino',
+    //   actors: ['John Travolta', 'Samuel L. Jackson', 'Uma Thurman'],
+    // },
   ];
   private idCounter = 4;
 
@@ -83,6 +83,9 @@ export class MovieService {
     const newMovie = {
       id: this.idCounter++,
       ...movie,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      version: 0,
     };
     this.movies.push(newMovie);
     return newMovie;
