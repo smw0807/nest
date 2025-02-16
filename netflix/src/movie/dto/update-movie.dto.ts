@@ -3,15 +3,6 @@ import {
   IsString,
   IsNumber,
   IsArray,
-  IsDefined,
-  Equals,
-  IsIn,
-  IsDateString,
-  ValidatorConstraintInterface,
-  ValidatorConstraint,
-  Validate,
-  ValidationOptions,
-  registerDecorator,
   IsNotEmpty,
 } from 'class-validator';
 
@@ -53,10 +44,6 @@ export class UpdateMovieDto {
   @IsOptional()
   @IsString()
   genre?: string;
-
-  // @IsOptional()
-  // @IsString()
-  // director?: string;
 
   @IsOptional()
   @IsNumber()

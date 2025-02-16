@@ -5,7 +5,6 @@ import { Movie } from './entity/movie.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { MovieDetail } from './entity/movie-detail.entity';
-import { DirectorService } from 'src/director/director.service';
 import { Director } from 'src/director/entitie/director.entity';
 
 /**
@@ -70,14 +69,6 @@ export class MovieService {
       },
     });
     return movie;
-    // const movieDetail = await this.movieDetailRepository.save({
-    //   detail: dto.detail,
-    // });
-    // const movieInfo = await this.movieRepository.save({
-    //   ...dto,
-    //   detail: movieDetail,
-    // });
-    // return movieInfo;
   }
 
   async update(id: number, dto: UpdateMovieDto) {

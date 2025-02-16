@@ -17,11 +17,6 @@ export class CreateMovieDto {
   @IsString()
   genre: string;
 
-  // todo 삭제
-  // @IsNotEmpty()
-  // @IsString()
-  // director: string;
-
   @IsNotEmpty()
   @IsNumber()
   directorId: number;
