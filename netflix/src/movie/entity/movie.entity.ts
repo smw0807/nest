@@ -18,7 +18,7 @@ export class Movie {
   @Column()
   description: string;
 
-  @Column()
+  @Column({ type: 'decimal', precision: 3, scale: 1 })
   rating: number;
 
   @Column()

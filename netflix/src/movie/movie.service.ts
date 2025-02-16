@@ -3,7 +3,7 @@ import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from './entity/movie.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 
 /**
  * @Injectable() 이란
@@ -24,8 +24,11 @@ export class MovieService {
   ) {}
 
   getManyMovies(name: string) {
-    //todo name filter
-    return this.movieRepository.find();
+    return this.movieRepository.findAndCount({
+      where: {
+        name: name ? ILike(`%${name}%`) : undefined,
+      },
+    });
   }
 
   getMovieById(id: number) {
