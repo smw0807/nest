@@ -46,14 +46,22 @@ export class MovieService {
   }
 
   async createMovie(dto: CreateMovieDto) {
-    const movieDetail = await this.movieDetailRepository.save({
-      detail: dto.detail,
-    });
-    const movieInfo = await this.movieRepository.save({
+    // cascade: true 옵션을 주면 영화 상세 정보를 생성할 때 영화 정보도 함께 생성된다.
+    const movie = await this.movieRepository.save({
       ...dto,
-      detail: movieDetail,
+      detail: {
+        detail: dto.detail,
+      },
     });
-    return movieInfo;
+    return movie;
+    // const movieDetail = await this.movieDetailRepository.save({
+    //   detail: dto.detail,
+    // });
+    // const movieInfo = await this.movieRepository.save({
+    //   ...dto,
+    //   detail: movieDetail,
+    // });
+    // return movieInfo;
   }
 
   async updateMovie(id: number, dto: UpdateMovieDto) {

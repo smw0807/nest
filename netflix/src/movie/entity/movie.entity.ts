@@ -41,7 +41,9 @@ export class Movie extends BaseTable {
   @Column('text', { array: true })
   actors: string[];
 
-  @OneToOne(() => MovieDetail)
+  @OneToOne(() => MovieDetail, (movieDetail) => movieDetail.movie.id, {
+    cascade: true,
+  })
   @JoinColumn()
   detail: MovieDetail;
 
