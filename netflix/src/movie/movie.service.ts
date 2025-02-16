@@ -26,7 +26,7 @@ export class MovieService {
     private readonly movieDetailRepository: Repository<MovieDetail>,
   ) {}
 
-  getManyMovies(name: string) {
+  findAll(name: string) {
     return this.movieRepository.findAndCount({
       where: {
         name: name ? ILike(`%${name}%`) : undefined,
@@ -34,7 +34,7 @@ export class MovieService {
     });
   }
 
-  getMovieById(id: number) {
+  findOne(id: number) {
     const movie = this.movieRepository.findOne({
       where: { id },
       relations: ['detail'],
@@ -45,12 +45,13 @@ export class MovieService {
     return movie;
   }
 
-  async createMovie(dto: CreateMovieDto) {
+  async create(dto: CreateMovieDto) {
+    const { director, detail, ...movieInfo } = dto;
     // cascade: true 옵션을 주면 영화 상세 정보를 생성할 때 영화 정보도 함께 생성된다.
     const movie = await this.movieRepository.save({
-      ...dto,
+      ...movieInfo,
       detail: {
-        detail: dto.detail,
+        detail: detail,
       },
     });
     return movie;
@@ -64,21 +65,21 @@ export class MovieService {
     // return movieInfo;
   }
 
-  async updateMovie(id: number, dto: UpdateMovieDto) {
-    const movie = await this.getMovieById(id);
+  async update(id: number, dto: UpdateMovieDto) {
+    const movie = await this.findOne(id);
     if (!movie) {
       throw new NotFoundException('존재하지 않는 ID의 영화입니다.');
     }
-    const { detail, ...movieInfo } = dto;
+    const { detail, director, ...movieInfo } = dto;
     await this.movieRepository.update(id, movieInfo);
     if (detail) {
       await this.movieDetailRepository.update(movie.detail.id, { detail });
     }
-    return this.getMovieById(id);
+    return this.findOne(id);
   }
 
-  async deleteMovie(id: number) {
-    const movie = await this.getMovieById(id);
+  async remove(id: number) {
+    const movie = await this.findOne(id);
     if (!movie) {
       throw new NotFoundException('존재하지 않는 ID의 영화입니다.');
     }
