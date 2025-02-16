@@ -29,4 +29,8 @@ export class CreateMovieDto {
   @IsArray()
   @IsString({ each: true })
   actors: string[];
+
+  @IsNotEmpty()
+  @IsString()
+  detail: string;
 }

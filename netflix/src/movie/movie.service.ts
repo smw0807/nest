@@ -4,6 +4,7 @@ import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from './entity/movie.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
+import { MovieDetail } from './entity/movie-detail.entity';
 
 /**
  * @Injectable() 이란
@@ -21,6 +22,8 @@ export class MovieService {
   constructor(
     @InjectRepository(Movie)
     private readonly movieRepository: Repository<Movie>,
+    @InjectRepository(MovieDetail)
+    private readonly movieDetailRepository: Repository<MovieDetail>,
   ) {}
 
   getManyMovies(name: string) {
@@ -28,6 +31,7 @@ export class MovieService {
       where: {
         name: name ? ILike(`%${name}%`) : undefined,
       },
+      relations: ['detail'],
     });
   }
 
@@ -40,7 +44,13 @@ export class MovieService {
   }
 
   async createMovie(dto: CreateMovieDto) {
-    const movieInfo = await this.movieRepository.save(dto);
+    const movieDetail = await this.movieDetailRepository.save({
+      detail: dto.detail,
+    });
+    const movieInfo = await this.movieRepository.save({
+      ...dto,
+      detail: movieDetail,
+    });
     return movieInfo;
   }
 
