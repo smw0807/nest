@@ -25,9 +25,6 @@ export class Movie extends BaseTable {
   @Column()
   name: string;
 
-  @Column()
-  description: string;
-
   @Column({ type: 'decimal', precision: 3, scale: 1 })
   rating: number;
 

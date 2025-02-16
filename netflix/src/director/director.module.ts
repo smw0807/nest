@@ -8,5 +8,6 @@ import { Director } from './entitie/director.entity';
   imports: [TypeOrmModule.forFeature([Director])],
   controllers: [DirectorController],
   providers: [DirectorService],
+  exports: [DirectorService],
 })
 export class DirectorModule {}

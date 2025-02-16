@@ -43,10 +43,6 @@ export class UpdateMovieDto {
   name?: string;
 
   @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsOptional()
   @IsNumber()
   rating?: number;
 
@@ -58,9 +54,13 @@ export class UpdateMovieDto {
   @IsString()
   genre?: string;
 
+  // @IsOptional()
+  // @IsString()
+  // director?: string;
+
   @IsOptional()
-  @IsString()
-  director?: string;
+  @IsNumber()
+  directorId?: number;
 
   @IsOptional()
   @IsArray()

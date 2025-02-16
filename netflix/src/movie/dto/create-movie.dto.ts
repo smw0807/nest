@@ -6,10 +6,6 @@ export class CreateMovieDto {
   name: string;
 
   @IsNotEmpty()
-  @IsString()
-  description: string;
-
-  @IsNotEmpty()
   @IsNumber()
   rating: number;
 
@@ -21,9 +17,14 @@ export class CreateMovieDto {
   @IsString()
   genre: string;
 
+  // todo 삭제
+  // @IsNotEmpty()
+  // @IsString()
+  // director: string;
+
   @IsNotEmpty()
-  @IsString()
-  director: string;
+  @IsNumber()
+  directorId: number;
 
   @IsNotEmpty()
   @IsArray()
