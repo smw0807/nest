@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from './entity/movie.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 /**
  * @Injectable() 이란
@@ -16,96 +18,44 @@ import { Movie } from './entity/movie.entity';
 
 @Injectable()
 export class MovieService {
-  private movies: Movie[] = [
-    // {
-    //   id: 1,
-    //   name: 'The Shawshank Redemption',
-    //   description:
-    //     'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.',
-    //   rating: 9.3,
-    //   year: 1994,
-    //   genre: 'Drama',
-    //   director: 'Frank Darabont',
-    //   actors: ['Tim Robbins', 'Morgan Freeman', 'Bob Gunton'],
-    // },
-    // {
-    //   id: 2,
-    //   name: 'The Godfather',
-    //   description:
-    //     'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.',
-    //   rating: 9.2,
-    //   year: 1972,
-    //   genre: 'Crime, Drama',
-    //   director: 'Francis Ford Coppola',
-    //   actors: ['Marlon Brando', 'Al Paccino', 'James Caan'],
-    // },
-    // {
-    //   id: 3,
-    //   name: 'The Dark Knight',
-    //   description:
-    //     'When the menace known as the Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.',
-    //   rating: 9.0,
-    //   year: 2008,
-    //   genre: 'Action, Crime, Drama',
-    //   director: 'Christopher Nolan',
-    //   actors: ['Christian Bale', 'Heath Ledger', 'Aaron Eckhart'],
-    // },
-    // {
-    //   id: 4,
-    //   name: 'Pulp Fiction',
-    //   description:
-    //     'The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.',
-    //   rating: 8.9,
-    //   year: 1994,
-    //   genre: 'Crime, Drama',
-    //   director: 'Quentin Tarantino',
-    //   actors: ['John Travolta', 'Samuel L. Jackson', 'Uma Thurman'],
-    // },
-  ];
-  private idCounter = 4;
+  constructor(
+    @InjectRepository(Movie)
+    private readonly movieRepository: Repository<Movie>,
+  ) {}
 
   getManyMovies(name: string) {
-    if (!name) {
-      return this.movies;
-    }
-    return this.movies.filter((movie) => movie.name.includes(name));
+    //todo name filter
+    return this.movieRepository.find();
   }
 
   getMovieById(id: number) {
-    const movie = this.movies.find((movie) => movie.id === +id);
+    const movie = this.movieRepository.findOne({ where: { id } });
     if (!movie) {
       throw new NotFoundException('존재하지 않는 ID의 영화입니다.');
     }
     return movie;
   }
 
-  createMovie(movie: CreateMovieDto) {
-    const newMovie = {
-      id: this.idCounter++,
-      ...movie,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      version: 0,
-    };
-    this.movies.push(newMovie);
-    return newMovie;
+  async createMovie(dto: CreateMovieDto) {
+    const movieInfo = await this.movieRepository.save(dto);
+    return movieInfo;
   }
 
-  updateMovie(id: number, movie: UpdateMovieDto) {
-    const movieIndex = this.movies.findIndex((movie) => movie.id === +id);
-    if (movieIndex === -1) {
+  async updateMovie(id: number, dto: UpdateMovieDto) {
+    const movie = await this.getMovieById(id);
+    if (!movie) {
       throw new NotFoundException('존재하지 않는 ID의 영화입니다.');
     }
-    Object.assign(this.movies[movieIndex], movie);
-    return this.movies[movieIndex];
+    await this.movieRepository.update(id, dto);
+    return this.getMovieById(id);
   }
 
-  deleteMovie(id: number) {
-    const movieIndex = this.movies.findIndex((movie) => movie.id === +id);
-    if (movieIndex === -1) {
+  async deleteMovie(id: number) {
+    const movie = await this.getMovieById(id);
+    if (!movie) {
       throw new NotFoundException('존재하지 않는 ID의 영화입니다.');
     }
-    this.movies.splice(movieIndex, 1);
+    await this.movieRepository.delete(id);
     return id;
   }
 }
