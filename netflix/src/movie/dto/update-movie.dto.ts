@@ -12,6 +12,7 @@ import {
   Validate,
   ValidationOptions,
   registerDecorator,
+  IsNotEmpty,
 } from 'class-validator';
 
 // @ValidatorConstraint({ name: 'password' })
@@ -64,6 +65,10 @@ export class UpdateMovieDto {
   @IsOptional()
   @IsArray()
   actors?: string[];
+
+  @IsNotEmpty()
+  @IsOptional()
+  detail?: string;
 
   // null || undefined 일 때 오류 발생
   // @IsDefined()

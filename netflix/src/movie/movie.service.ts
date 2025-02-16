@@ -31,12 +31,14 @@ export class MovieService {
       where: {
         name: name ? ILike(`%${name}%`) : undefined,
       },
-      relations: ['detail'],
     });
   }
 
   getMovieById(id: number) {
-    const movie = this.movieRepository.findOne({ where: { id } });
+    const movie = this.movieRepository.findOne({
+      where: { id },
+      relations: ['detail'],
+    });
     if (!movie) {
       throw new NotFoundException('존재하지 않는 ID의 영화입니다.');
     }
@@ -59,7 +61,11 @@ export class MovieService {
     if (!movie) {
       throw new NotFoundException('존재하지 않는 ID의 영화입니다.');
     }
-    await this.movieRepository.update(id, dto);
+    const { detail, ...movieInfo } = dto;
+    await this.movieRepository.update(id, movieInfo);
+    if (detail) {
+      await this.movieDetailRepository.update(movie.detail.id, { detail });
+    }
     return this.getMovieById(id);
   }
 
