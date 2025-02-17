@@ -27,7 +27,6 @@ export class MovieService {
     private readonly movieDetailRepository: Repository<MovieDetail>,
     @InjectRepository(Director)
     private readonly directorRepository: Repository<Director>,
-    // private readonly directorService: DirectorService,
   ) {}
 
   findAll(name: string) {
@@ -35,6 +34,7 @@ export class MovieService {
       where: {
         name: name ? ILike(`%${name}%`) : undefined,
       },
+      relations: ['director'],
     });
   }
 
@@ -51,7 +51,6 @@ export class MovieService {
 
   async create(dto: CreateMovieDto) {
     const { directorId, detail, ...movieInfo } = dto;
-    // const director = await this.directorService.findOne(directorId);
     const director = await this.directorRepository.findOne({
       where: { id: directorId },
     });
