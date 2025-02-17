@@ -42,8 +42,9 @@ export class UpdateMovieDto {
   year?: number;
 
   @IsOptional()
-  @IsString()
-  genre?: string;
+  @IsArray()
+  @IsNumber({}, { each: true })
+  genreIds?: number[];
 
   @IsOptional()
   @IsNumber()
