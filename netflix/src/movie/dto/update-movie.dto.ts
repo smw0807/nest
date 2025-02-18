@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsArray,
   IsNotEmpty,
+  ArrayNotEmpty,
 } from 'class-validator';
 
 // @ValidatorConstraint({ name: 'password' })
@@ -43,6 +44,7 @@ export class UpdateMovieDto {
 
   @IsOptional()
   @IsArray()
+  @ArrayNotEmpty()
   @IsNumber({}, { each: true })
   genreIds?: number[];
 
