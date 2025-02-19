@@ -30,6 +30,7 @@ export class MovieService {
     private readonly directorRepository: Repository<Director>,
     @InjectRepository(Genre)
     private readonly genreRepository: Repository<Genre>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async findAll(name: string) {
@@ -73,31 +74,42 @@ export class MovieService {
   }
 
   async create(dto: CreateMovieDto) {
-    const { directorId, detail, genreIds, ...movieInfo } = dto;
-    const director = await this.directorRepository.findOne({
-      where: { id: directorId },
-    });
-    if (!director) {
-      throw new NotFoundException('존재하지 않는 ID의 감독입니다.');
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const { directorId, detail, genreIds, ...movieInfo } = dto;
+      const director = await queryRunner.manager.findOne(Director, {
+        where: { id: directorId },
+      });
+      if (!director) {
+        throw new NotFoundException('존재하지 않는 ID의 감독입니다.');
+      }
+      const genres = await queryRunner.manager.find(Genre, {
+        where: { id: In(genreIds) },
+      });
+      if (genres.length !== genreIds.length) {
+        throw new NotFoundException(
+          `존재하지 않는 장르가 있습니다. 존재하는 ids => ${genres.map((genre) => genre.id).join(',')}`,
+        );
+      }
+      // cascade: true 옵션을 주면 영화 상세 정보를 생성할 때 영화 정보도 함께 생성된다.
+      const movie = await queryRunner.manager.save(Movie, {
+        ...movieInfo,
+        detail: {
+          detail: detail,
+        },
+        director,
+        genres,
+      });
+      await queryRunner.commitTransaction();
+      return movie;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
     }
-    const genres = await this.genreRepository.find({
-      where: { id: In(genreIds) },
-    });
-    if (genres.length !== genreIds.length) {
-      throw new NotFoundException(
-        `존재하지 않는 장르가 있습니다. 존재하는 ids => ${genres.map((genre) => genre.id).join(',')}`,
-      );
-    }
-    // cascade: true 옵션을 주면 영화 상세 정보를 생성할 때 영화 정보도 함께 생성된다.
-    const movie = await this.movieRepository.save({
-      ...movieInfo,
-      detail: {
-        detail: detail,
-      },
-      director,
-      genres,
-    });
-    return movie;
   }
 
   async update(id: number, dto: UpdateMovieDto) {
