@@ -20,7 +20,10 @@ export class AuthService {
     if (basicSplit.length !== 2) {
       throw new BadRequestException('토큰 포맷이 잘못됐습니다.!');
     }
-    const [_, token] = basicSplit;
+    const [basic, token] = basicSplit;
+    if (basic.toLocaleLowerCase() !== 'basic') {
+      throw new BadRequestException('토큰 포맷이 잘못됐습니다.!');
+    }
     // 추출한 토큰을 base64 디코딩해서 이메일과 비밀번호로 나눈다.
     const decoded = Buffer.from(token, 'base64').toString('utf-8');
 
@@ -31,6 +34,31 @@ export class AuthService {
     }
     const [email, password] = tokenSplit;
     return { email, password };
+  }
+
+  async parseBearerToken(rawToken: string, isRefreshToken: boolean) {
+    const bearerSplit = rawToken.split(' ');
+    if (bearerSplit.length !== 2) {
+      throw new BadRequestException('토큰 포맷이 잘못됐습니다.!');
+    }
+    const [bearer, token] = bearerSplit;
+    if (bearer.toLocaleLowerCase() !== 'bearer') {
+      throw new BadRequestException('토큰 포맷이 잘못됐습니다.!');
+    }
+
+    const payload = await this.jwtService.verifyAsync(token, {
+      secret: this.configService.get<string>('ACCESS_TOKEN_SECRET'),
+    });
+    if (isRefreshToken) {
+      if (payload.type !== 'refresh') {
+        throw new BadRequestException('리프레시 토큰이 아닙니다.!');
+      }
+    } else {
+      if (payload.type !== 'access') {
+        throw new BadRequestException('엑세스 토큰이 아닙니다.!');
+      }
+    }
+    return payload;
   }
 
   // rawToken -> "Basic $token"
@@ -80,7 +108,10 @@ export class AuthService {
     return user;
   }
 
-  async issueToken(user: User, isRefreshToken: boolean) {
+  async issueToken(
+    user: { id: number; role: number },
+    isRefreshToken: boolean,
+  ) {
     const refreshTokenSecret = this.configService.get<string>(
       'REFRESH_TOKEN_SECRET',
     );
