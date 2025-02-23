@@ -22,10 +22,6 @@ export class RBACGuard implements CanActivate {
       return false;
     }
 
-    const userRole = user.role;
-    if (userRole === Role.admin) {
-      return true;
-    }
     return user.role <= requiredRoles;
   }
 }
