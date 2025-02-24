@@ -37,7 +37,7 @@ export class MovieService {
   ) {}
 
   async findAll(dto: GetMoviesDto) {
-    const { name, page, take } = dto;
+    const { name, take, page } = dto;
     const query = await this.movieRepository
       .createQueryBuilder('movie')
       .leftJoinAndSelect('movie.detail', 'detail')
@@ -54,8 +54,8 @@ export class MovieService {
         page,
         take,
       });
-      // query.skip((page - 1) * take).take(take);
     }
+    // this.commonService.applyCursorPaginationParamsToQb(query, dto);
     return await query.getManyAndCount();
     // return this.movieRepository.findAndCount({
     //   where: {
