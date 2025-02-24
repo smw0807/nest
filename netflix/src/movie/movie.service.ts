@@ -7,6 +7,8 @@ import { DataSource, ILike, In, Repository } from 'typeorm';
 import { MovieDetail } from './entity/movie-detail.entity';
 import { Director } from 'src/director/entitie/director.entity';
 import { Genre } from 'src/genre/entities/genre.entity';
+import { GetMoviesDto } from './dto/get-movies.dto';
+import { CommonService } from 'src/common/common.service';
 
 /**
  * @Injectable() 이란
@@ -31,9 +33,11 @@ export class MovieService {
     @InjectRepository(Genre)
     private readonly genreRepository: Repository<Genre>,
     private readonly dataSource: DataSource,
+    private readonly commonService: CommonService,
   ) {}
 
-  async findAll(name: string) {
+  async findAll(dto: GetMoviesDto) {
+    const { name, page, take } = dto;
     const query = await this.movieRepository
       .createQueryBuilder('movie')
       .leftJoinAndSelect('movie.detail', 'detail')
@@ -44,6 +48,13 @@ export class MovieService {
       query.where('movie.name LIKE :name', {
         name: `%${name}%`,
       });
+    }
+    if (take && page) {
+      this.commonService.applyPagePaginationParamsToQb(query, {
+        page,
+        take,
+      });
+      // query.skip((page - 1) * take).take(take);
     }
     return await query.getManyAndCount();
     // return this.movieRepository.findAndCount({

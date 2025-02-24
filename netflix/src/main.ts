@@ -12,6 +12,10 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
       // 데이터 타입이 다르면 오류 발생
       transform: true,
+      transformOptions: {
+        // class에 적혀있는 타입에 맞게 자동으로 변환
+        enableImplicitConversion: true,
+      },
     }),
   );
   await app.listen(3000);
