@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
   NestInterceptor,
 } from '@nestjs/common';
-import { delay, Observable, tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 @Injectable()
 export class ResponseTimeInterceptor implements NestInterceptor {
@@ -14,7 +14,6 @@ export class ResponseTimeInterceptor implements NestInterceptor {
 
     const reqTime = Date.now();
     return next.handle().pipe(
-      delay(1000),
       tap(() => {
         const resTime = Date.now();
         const diff = resTime - reqTime;
