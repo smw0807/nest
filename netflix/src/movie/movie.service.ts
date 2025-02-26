@@ -3,7 +3,7 @@ import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from './entity/movie.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, ILike, In, Repository } from 'typeorm';
+import { DataSource, ILike, In, QueryRunner, Repository } from 'typeorm';
 import { MovieDetail } from './entity/movie-detail.entity';
 import { Director } from 'src/director/entitie/director.entity';
 import { Genre } from 'src/genre/entities/genre.entity';
@@ -90,43 +90,32 @@ export class MovieService {
     // return movie;
   }
 
-  async create(dto: CreateMovieDto) {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      const { directorId, detail, genreIds, ...movieInfo } = dto;
-      const director = await queryRunner.manager.findOne(Director, {
-        where: { id: directorId },
-      });
-      if (!director) {
-        throw new NotFoundException('존재하지 않는 ID의 감독입니다.');
-      }
-      const genres = await queryRunner.manager.find(Genre, {
-        where: { id: In(genreIds) },
-      });
-      if (genres.length !== genreIds.length) {
-        throw new NotFoundException(
-          `존재하지 않는 장르가 있습니다. 존재하는 ids => ${genres.map((genre) => genre.id).join(',')}`,
-        );
-      }
-      // cascade: true 옵션을 주면 영화 상세 정보를 생성할 때 영화 정보도 함께 생성된다.
-      const movie = await queryRunner.manager.save(Movie, {
-        ...movieInfo,
-        detail: {
-          detail: detail,
-        },
-        director,
-        genres,
-      });
-      await queryRunner.commitTransaction();
-      return movie;
-    } catch (e) {
-      await queryRunner.rollbackTransaction();
-      throw e;
-    } finally {
-      await queryRunner.release();
+  async create(dto: CreateMovieDto, queryRunner: QueryRunner) {
+    const { directorId, detail, genreIds, ...movieInfo } = dto;
+    const director = await queryRunner.manager.findOne(Director, {
+      where: { id: directorId },
+    });
+    if (!director) {
+      throw new NotFoundException('존재하지 않는 ID의 감독입니다.');
     }
+    const genres = await queryRunner.manager.find(Genre, {
+      where: { id: In(genreIds) },
+    });
+    if (genres.length !== genreIds.length) {
+      throw new NotFoundException(
+        `존재하지 않는 장르가 있습니다. 존재하는 ids => ${genres.map((genre) => genre.id).join(',')}`,
+      );
+    }
+    // cascade: true 옵션을 주면 영화 상세 정보를 생성할 때 영화 정보도 함께 생성된다.
+    const movie = await queryRunner.manager.save(Movie, {
+      ...movieInfo,
+      detail: {
+        detail: detail,
+      },
+      director,
+      genres,
+    });
+    return movie;
   }
 
   async update(id: number, dto: UpdateMovieDto) {
