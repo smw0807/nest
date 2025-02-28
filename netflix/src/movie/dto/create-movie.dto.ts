@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
   IsNumber,
@@ -11,8 +12,10 @@ export class CreateMovieDto {
   @IsString()
   name: string;
 
+  // 소수점 허용
   @IsNotEmpty()
   @IsNumber()
+  @Type(() => Number)
   rating: number;
 
   @IsNotEmpty()
@@ -26,6 +29,7 @@ export class CreateMovieDto {
   @IsArray()
   @ArrayNotEmpty()
   @IsNumber({}, { each: true })
+  @Type(() => Number)
   genreIds: number[];
 
   @IsNotEmpty()
