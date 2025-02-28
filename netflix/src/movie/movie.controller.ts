@@ -14,6 +14,7 @@ import {
   UseGuards,
   UploadedFile,
   UploadedFiles,
+  BadRequestException,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
@@ -51,16 +52,32 @@ export class MovieController {
   @UseGuards(AuthGuard)
   @UseInterceptors(
     TransactionInterceptor,
-    FileFieldsInterceptor([
+    FileFieldsInterceptor(
+      [
+        {
+          name: 'movie',
+          maxCount: 1,
+        },
+        {
+          name: 'poster',
+          maxCount: 2,
+        },
+      ],
       {
-        name: 'movie',
-        maxCount: 1,
+        limits: {
+          fileSize: 1024 * 1024 * 20,
+        },
+        fileFilter: (req, file, cb) => {
+          // if (file.mimetype !== 'video/mp4') {
+          //   return cb(
+          //     new BadRequestException('mp4 파일만 업로드 가능합니다.'),
+          //     false,
+          //   );
+          // }
+          return cb(null, true);
+        },
       },
-      {
-        name: 'poster',
-        maxCount: 2,
-      },
-    ]),
+    ),
   )
   @Post()
   postMovie(
