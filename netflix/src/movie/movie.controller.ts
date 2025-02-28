@@ -54,9 +54,9 @@ export class MovieController {
   @UseInterceptors(
     TransactionInterceptor,
     FileInterceptor('movie', {
-      limits: {
-        fileSize: 2000000,
-      },
+      // limits: {
+      //   fileSize: 2000000,
+      // },
       fileFilter: (req, file, cb) => {
         if (file.mimetype !== 'video/mp4') {
           return cb(
@@ -75,9 +75,7 @@ export class MovieController {
     @UploadedFile()
     movie: Express.Multer.File,
   ) {
-    console.log('--------------------');
-    console.log(movie);
-    return this.movieService.create(body, req.queryRunner);
+    return this.movieService.create(body, movie.filename, req.queryRunner);
   }
 
   @RBAC(Role.admin)

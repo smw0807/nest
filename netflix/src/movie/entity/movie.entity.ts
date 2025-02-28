@@ -25,6 +25,9 @@ export class Movie extends BaseTable {
   @Column({ unique: true })
   name: string;
 
+  @Column({ nullable: true })
+  movieFilePath?: string;
+
   @Column({ type: 'decimal', precision: 3, scale: 1 })
   rating: number;
 

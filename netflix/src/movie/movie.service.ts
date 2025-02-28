@@ -9,6 +9,7 @@ import { Director } from 'src/director/entitie/director.entity';
 import { Genre } from 'src/genre/entities/genre.entity';
 import { GetMoviesDto } from './dto/get-movies.dto';
 import { CommonService } from 'src/common/common.service';
+import { join } from 'path';
 
 /**
  * @Injectable() 이란
@@ -90,7 +91,11 @@ export class MovieService {
     // return movie;
   }
 
-  async create(dto: CreateMovieDto, queryRunner: QueryRunner) {
+  async create(
+    dto: CreateMovieDto,
+    movieFileName: string,
+    queryRunner: QueryRunner,
+  ) {
     const { directorId, detail, genreIds, ...movieInfo } = dto;
     const director = await queryRunner.manager.findOne(Director, {
       where: { id: directorId },
@@ -106,6 +111,7 @@ export class MovieService {
         `존재하지 않는 장르가 있습니다. 존재하는 ids => ${genres.map((genre) => genre.id).join(',')}`,
       );
     }
+    const movieFolder = join('public', 'movie');
     // cascade: true 옵션을 주면 영화 상세 정보를 생성할 때 영화 정보도 함께 생성된다.
     const movie = await queryRunner.manager.save(Movie, {
       ...movieInfo,
@@ -114,6 +120,7 @@ export class MovieService {
       },
       director,
       genres,
+      movieFilePath: join(movieFolder, movieFileName),
     });
     return movie;
   }
