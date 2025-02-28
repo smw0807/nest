@@ -25,10 +25,8 @@ import { RBACGuard } from './auth/guard/rbac.guard';
 import { ResponseTimeInterceptor } from './common/interceptor/response-time.interceptor';
 import { ForbiddenExceptionFilter } from './common/filter/forbidden.filter';
 import { QueryFailedExceptionFilter } from './common/filter/query-failed.filter';
-import { MulterModule } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 import { join } from 'path';
-import { v4 } from 'uuid';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
@@ -60,24 +58,15 @@ import { v4 } from 'uuid';
       }),
       inject: [ConfigService],
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'public'),
+      serveRoot: '/public/',
+    }),
     MovieModule,
     DirectorModule,
     GenreModule,
     AuthModule,
     UserModule,
-    MulterModule.register({
-      storage: diskStorage({
-        destination: join(process.cwd(), 'public', 'movie'),
-        filename(req, file, cb) {
-          const split = file.originalname.split('.');
-          let extension = 'mp4';
-          if (split.length > 1) {
-            extension = split[split.length - 1];
-          }
-          cb(null, `${v4()}_${Date.now()}.${extension}`);
-        },
-      }),
-    }),
   ],
   controllers: [],
   providers: [
