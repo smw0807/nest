@@ -5,7 +5,7 @@ import { Movie } from './entity/movie.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, ILike, In, QueryRunner, Repository } from 'typeorm';
 import { MovieDetail } from './entity/movie-detail.entity';
-import { Director } from 'src/director/entitie/director.entity';
+import { Director } from 'src/director/entity/director.entity';
 import { Genre } from 'src/genre/entities/genre.entity';
 import { GetMoviesDto } from './dto/get-movies.dto';
 import { CommonService } from 'src/common/common.service';

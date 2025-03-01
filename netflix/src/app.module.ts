@@ -11,7 +11,7 @@ import * as Joi from 'joi';
 import { Movie } from './movie/entity/movie.entity';
 import { MovieDetail } from './movie/entity/movie-detail.entity';
 import { DirectorModule } from './director/director.module';
-import { Director } from './director/entitie/director.entity';
+import { Director } from './director/entity/director.entity';
 import { GenreModule } from './genre/genre.module';
 import { Genre } from './genre/entities/genre.entity';
 import { AuthModule } from './auth/auth.module';
