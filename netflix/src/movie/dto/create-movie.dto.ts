@@ -44,4 +44,8 @@ export class CreateMovieDto {
   @IsNotEmpty()
   @IsString()
   detail: string;
+
+  @IsNotEmpty()
+  @IsString()
+  movieFileName: string;
 }

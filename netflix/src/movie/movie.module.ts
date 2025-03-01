@@ -17,19 +17,19 @@ import { v4 } from 'uuid';
     TypeOrmModule.forFeature([Movie, MovieDetail, Director, Genre]),
     DirectorModule,
     CommonModule,
-    MulterModule.register({
-      storage: diskStorage({
-        destination: join(process.cwd(), 'public', 'movie'),
-        filename(req, file, cb) {
-          const split = file.originalname.split('.');
-          let extension = 'mp4';
-          if (split.length > 1) {
-            extension = split[split.length - 1];
-          }
-          cb(null, `${v4()}_${Date.now()}.${extension}`);
-        },
-      }),
-    }),
+    // MulterModule.register({
+    //   storage: diskStorage({
+    //     destination: join(process.cwd(), 'public', 'movie'),
+    //     filename(req, file, cb) {
+    //       const split = file.originalname.split('.');
+    //       let extension = 'mp4';
+    //       if (split.length > 1) {
+    //         extension = split[split.length - 1];
+    //       }
+    //       cb(null, `${v4()}_${Date.now()}.${extension}`);
+    //     },
+    //   }),
+    // }),
   ],
   controllers: [MovieController],
   providers: [MovieService],

@@ -10,6 +10,7 @@ import { Genre } from 'src/genre/entities/genre.entity';
 import { GetMoviesDto } from './dto/get-movies.dto';
 import { CommonService } from 'src/common/common.service';
 import { join } from 'path';
+import { rename } from 'fs/promises';
 
 /**
  * @Injectable() 이란
@@ -50,12 +51,6 @@ export class MovieService {
         name: `%${name}%`,
       });
     }
-    // if (take && page) {
-    //   this.commonService.applyPagePaginationParamsToQb(query, {
-    //     page,
-    //     take,
-    //   });
-    // }
     const { nextCursor } =
       await this.commonService.applyCursorPaginationParamsToQb(query, dto);
     const [data, count] = await query.getManyAndCount();
@@ -64,12 +59,6 @@ export class MovieService {
       count,
       nextCursor,
     };
-    // return this.movieRepository.findAndCount({
-    //   where: {
-    //     name: name ? ILike(`%${name}%`) : undefined,
-    //   },
-    //   relations: ['director', 'genres'],
-    // });
   }
 
   findOne(id: number) {
@@ -81,22 +70,10 @@ export class MovieService {
       .where('movie.id = :id', { id: id })
       .getOne();
     return movie;
-    // const movie = this.movieRepository.findOne({
-    //   where: { id },
-    //   relations: ['detail', 'director', 'genres'],
-    // });
-    // if (!movie) {
-    //   throw new NotFoundException('존재하지 않는 ID의 영화입니다.');
-    // }
-    // return movie;
   }
 
-  async create(
-    dto: CreateMovieDto,
-    movieFileName: string,
-    queryRunner: QueryRunner,
-  ) {
-    const { directorId, detail, genreIds, ...movieInfo } = dto;
+  async create(dto: CreateMovieDto, queryRunner: QueryRunner) {
+    const { directorId, detail, genreIds, movieFileName, ...movieInfo } = dto;
     const director = await queryRunner.manager.findOne(Director, {
       where: { id: directorId },
     });
@@ -112,6 +89,11 @@ export class MovieService {
       );
     }
     const movieFolder = join('public', 'movie');
+    const tempFolder = join('public', 'temp');
+    await rename(
+      join(process.cwd(), tempFolder, movieFileName),
+      join(process.cwd(), movieFolder, movieFileName),
+    );
     // cascade: true 옵션을 주면 영화 상세 정보를 생성할 때 영화 정보도 함께 생성된다.
     const movie = await queryRunner.manager.save(Movie, {
       ...movieInfo,
@@ -169,10 +151,6 @@ export class MovieService {
         .set(movieUpdateFields)
         .where('id = :id', { id })
         .execute();
-      // await this.movieRepository.update(id, {
-      //   ...movieInfo,
-      //   ...(newDirector && { director: newDirector }),
-      // });
       if (detail) {
         await queryRunner.manager
           .createQueryBuilder()
@@ -180,7 +158,6 @@ export class MovieService {
           .set({ detail })
           .where('id = :id', { id: movie.detail.id })
           .execute();
-        // await this.movieDetailRepository.update(movie.detail.id, { detail });
       }
       if (newGenres) {
         //Many To Many 관계에서 추가와 제거를 동시에 할 때 사용
@@ -193,12 +170,6 @@ export class MovieService {
             movie.genres.map((genre) => genre.id),
           );
       }
-      // const newMovie = await this.movieRepository.findOne({
-      //   where: { id: movie.detail.id },
-      //   relations: ['detail', 'director'],
-      // });
-      // newMovie.genres = newGenres;
-      // await this.movieRepository.save(newMovie);
       const result = await queryRunner.manager.findOne(Movie, {
         where: { id: movie.detail.id },
         relations: ['detail', 'director', 'genres'],
@@ -218,7 +189,6 @@ export class MovieService {
     if (!movie) {
       throw new NotFoundException('존재하지 않는 ID의 영화입니다.');
     }
-    // await this.movieRepository.delete(id);
     await this.movieRepository
       .createQueryBuilder()
       .delete()

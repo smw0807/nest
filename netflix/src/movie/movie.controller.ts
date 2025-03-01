@@ -25,12 +25,6 @@ import { RBAC } from 'src/auth/decorator/rbac.decorator';
 import { Role } from 'src/user/entities/user.entity';
 import { GetMoviesDto } from './dto/get-movies.dto';
 import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-  FilesInterceptor,
-} from '@nestjs/platform-express';
-import { MovieFilePipe } from './pipe/movie-file.pipe';
 
 @Controller('movie')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -51,31 +45,10 @@ export class MovieController {
 
   @RBAC(Role.admin)
   @UseGuards(AuthGuard)
-  @UseInterceptors(
-    TransactionInterceptor,
-    FileInterceptor('movie', {
-      // limits: {
-      //   fileSize: 2000000,
-      // },
-      fileFilter: (req, file, cb) => {
-        if (file.mimetype !== 'video/mp4') {
-          return cb(
-            new BadRequestException('mp4 파일만 업로드 가능합니다.'),
-            false,
-          );
-        }
-        return cb(null, true);
-      },
-    }),
-  )
+  @UseInterceptors(TransactionInterceptor)
   @Post()
-  postMovie(
-    @Body() body: CreateMovieDto,
-    @Request() req,
-    @UploadedFile()
-    movie: Express.Multer.File,
-  ) {
-    return this.movieService.create(body, movie.filename, req.queryRunner);
+  postMovie(@Body() body: CreateMovieDto, @Request() req) {
+    return this.movieService.create(body, req.queryRunner);
   }
 
   @RBAC(Role.admin)
