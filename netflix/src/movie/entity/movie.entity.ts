@@ -13,6 +13,7 @@ import { MovieDetail } from './movie-detail.entity';
 import { Director } from 'src/director/entity/director.entity';
 import { Genre } from 'src/genre/entities/genre.entity';
 import { Transform } from 'class-transformer';
+import { User } from 'src/user/entities/user.entity';
 
 /// Many to One - Director -> 감독은 여러개의 영화를 만들 수 있음
 // One To One - MovieDetail -> 영화는 하나의 상세 내용을 갖을 수 있음
@@ -58,6 +59,9 @@ export class Movie extends BaseTable {
   })
   @JoinColumn()
   detail: MovieDetail;
+
+  @ManyToOne(() => User, (user) => user.id)
+  creator: User;
 
   // @Column(() => BaseEntity)
   // base: BaseEntity;

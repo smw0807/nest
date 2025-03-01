@@ -44,7 +44,8 @@ export class MovieService {
       .createQueryBuilder('movie')
       .leftJoinAndSelect('movie.detail', 'detail')
       .leftJoinAndSelect('movie.director', 'director')
-      .leftJoinAndSelect('movie.genres', 'genres');
+      .leftJoinAndSelect('movie.genres', 'genres')
+      .leftJoinAndSelect('movie.creator', 'creator');
 
     if (name) {
       query.where('movie.name LIKE :name', {
@@ -72,7 +73,7 @@ export class MovieService {
     return movie;
   }
 
-  async create(dto: CreateMovieDto, queryRunner: QueryRunner) {
+  async create(dto: CreateMovieDto, queryRunner: QueryRunner, userId: number) {
     const { directorId, detail, genreIds, movieFileName, ...movieInfo } = dto;
     const director = await queryRunner.manager.findOne(Director, {
       where: { id: directorId },
@@ -90,10 +91,7 @@ export class MovieService {
     }
     const movieFolder = join('public', 'movie');
     const tempFolder = join('public', 'temp');
-    await rename(
-      join(process.cwd(), tempFolder, movieFileName),
-      join(process.cwd(), movieFolder, movieFileName),
-    );
+
     // cascade: true 옵션을 주면 영화 상세 정보를 생성할 때 영화 정보도 함께 생성된다.
     const movie = await queryRunner.manager.save(Movie, {
       ...movieInfo,
@@ -103,7 +101,14 @@ export class MovieService {
       director,
       genres,
       movieFilePath: join(movieFolder, movieFileName),
+      creator: {
+        id: userId,
+      },
     });
+    await rename(
+      join(process.cwd(), tempFolder, movieFileName),
+      join(process.cwd(), movieFolder, movieFileName),
+    );
     return movie;
   }
 
