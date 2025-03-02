@@ -10,11 +10,7 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   ParseIntPipe,
-  Request,
   UseGuards,
-  UploadedFile,
-  UploadedFiles,
-  BadRequestException,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
@@ -35,8 +31,8 @@ export class MovieController {
 
   @Public()
   @Get()
-  getMovies(@Query() dto: GetMoviesDto) {
-    return this.movieService.findAll(dto);
+  getMovies(@Query() dto: GetMoviesDto, @UserId() userId?: number) {
+    return this.movieService.findAll(dto, userId);
   }
 
   @Public()

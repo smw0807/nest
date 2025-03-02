@@ -7,7 +7,7 @@ import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from './entity/movie.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, ILike, In, QueryRunner, Repository } from 'typeorm';
+import { DataSource, In, QueryRunner, Repository } from 'typeorm';
 import { MovieDetail } from './entity/movie-detail.entity';
 import { Director } from 'src/director/entity/director.entity';
 import { Genre } from 'src/genre/entities/genre.entity';
@@ -48,7 +48,7 @@ export class MovieService {
     private readonly commonService: CommonService,
   ) {}
 
-  async findAll(dto: GetMoviesDto) {
+  async findAll(dto: GetMoviesDto, userId?: number) {
     const { name } = dto;
     const query = await this.movieRepository
       .createQueryBuilder('movie')
@@ -64,7 +64,35 @@ export class MovieService {
     }
     const { nextCursor } =
       await this.commonService.applyCursorPaginationParamsToQb(query, dto);
-    const [data, count] = await query.getManyAndCount();
+    let [data, count] = await query.getManyAndCount();
+
+    if (userId) {
+      const movieIds = data.map((movie) => movie.id);
+
+      const likedMovies = await this.movieUserLikeRepository
+        .createQueryBuilder('mul')
+        .leftJoinAndSelect('mul.user', 'user')
+        .leftJoinAndSelect('mul.movie', 'movie')
+        .where('movie.id IN (:...movieIds)', { movieIds })
+        .andWhere('user.id = :userId', { userId })
+        .getMany();
+
+      const likedMovieMap = likedMovies.reduce(
+        (acc, next) => ({
+          ...acc,
+          [next.movie.id]: next.isLike,
+        }),
+        {},
+      );
+
+      data = data.map((movie) => {
+        return {
+          ...movie,
+          likeStatus:
+            movie.id in likedMovieMap ? likedMovieMap[movie.id] : null,
+        };
+      });
+    }
     return {
       data,
       count,
