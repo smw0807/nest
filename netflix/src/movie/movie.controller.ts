@@ -26,7 +26,8 @@ import { Role } from 'src/user/entities/user.entity';
 import { GetMoviesDto } from './dto/get-movies.dto';
 import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
 import { UserId } from 'src/user/decorator/user-id.decorator';
-
+import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
+import { QueryRunner as QR } from 'typeorm';
 @Controller('movie')
 @UseInterceptors(ClassSerializerInterceptor)
 export class MovieController {
@@ -50,10 +51,10 @@ export class MovieController {
   @Post()
   postMovie(
     @Body() body: CreateMovieDto,
-    @Request() req,
+    @QueryRunner() queryRunner: QR,
     @UserId() userId: number,
   ) {
-    return this.movieService.create(body, req.queryRunner, userId);
+    return this.movieService.create(body, queryRunner, userId);
   }
 
   @RBAC(Role.admin)
