@@ -6,8 +6,11 @@ import { diskStorage } from 'multer';
 import { join } from 'path';
 import { v4 } from 'uuid';
 import { TaskService } from './task.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Movie } from 'src/movie/entity/movie.entity';
 @Module({
   imports: [
+    TypeOrmModule.forFeature([Movie]),
     MulterModule.register({
       storage: diskStorage({
         destination: join(process.cwd(), 'public', 'temp'),

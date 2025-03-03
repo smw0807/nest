@@ -46,6 +46,9 @@ export class Movie extends BaseTable {
   @Column({ default: 0 })
   likeCount: number;
 
+  @Column({ default: 0 })
+  dislikeCount: number;
+
   @ManyToOne(() => Director, (director) => director.id, {
     cascade: true,
     nullable: false,
