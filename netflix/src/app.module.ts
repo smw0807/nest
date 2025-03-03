@@ -29,6 +29,7 @@ import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { BadRequestExceptionFilter } from './common/filter/badRequest.filter';
 import { MovieUserLike } from './movie/entity/movie-user-like.entity';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -59,6 +60,10 @@ import { MovieUserLike } from './movie/entity/movie-user-like.entity';
         synchronize: true, // 개발 환경에서만 사용
       }),
       inject: [ConfigService],
+    }),
+    CacheModule.register({
+      ttl: 3000,
+      isGlobal: true,
     }),
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'public'),
