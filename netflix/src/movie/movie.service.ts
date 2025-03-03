@@ -1,4 +1,5 @@
 import {
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -17,6 +18,8 @@ import { join } from 'path';
 import { rename } from 'fs/promises';
 import { User } from 'src/user/entities/user.entity';
 import { MovieUserLike } from './entity/movie-user-like.entity';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 /**
  * @Injectable() 이란
@@ -46,7 +49,24 @@ export class MovieService {
     private readonly movieUserLikeRepository: Repository<MovieUserLike>,
     private readonly dataSource: DataSource,
     private readonly commonService: CommonService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
   ) {}
+
+  async findRecent() {
+    const cacheData = await this.cacheManager.get('movieRecent');
+    if (cacheData) {
+      return cacheData;
+    }
+    const data = await this.movieRepository.find({
+      order: {
+        createdAt: 'DESC',
+      },
+      take: 10,
+    });
+    await this.cacheManager.set('movieRecent', data);
+    return data;
+  }
 
   async findAll(dto: GetMoviesDto, userId?: number) {
     const { name } = dto;
