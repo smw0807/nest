@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Headers,
@@ -7,7 +8,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGuard } from './strategy/local.strategy';
 import { JwtAuthGuard } from './strategy/jwt.strategy';
 import { Public } from './decorator/public.decorator';
@@ -44,6 +44,11 @@ export class AuthController {
     return {
       accessToken: await this.authService.issueToken(req.user, false),
     };
+  }
+
+  @Post('token/block')
+  async blockToken(@Body('token') token: string) {
+    return this.authService.blockToken(token);
   }
 
   @UseGuards(JwtAuthGuard)
