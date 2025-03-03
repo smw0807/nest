@@ -48,7 +48,7 @@ export class TaskService {
     );
   }
 
-  @Cron('0 * * * * *')
+  // @Cron('0 * * * * *')
   async calculateMovieLikeCount() {
     console.log('영화 좋아요 수 계산');
     await this.movieRepository.query(
