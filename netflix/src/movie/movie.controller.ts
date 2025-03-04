@@ -34,19 +34,6 @@ import { Throttle } from 'src/common/decorator/throttlw.decorator';
 
 @Controller({
   path: 'movie',
-  version: ['2', '3'],
-})
-export class MovieV2Controller {
-  constructor(private readonly movieService: MovieService) {}
-
-  @Get()
-  getMovies(@Query() dto: GetMoviesDto, @UserId() userId?: number) {
-    return this.movieService.findAll(dto, userId);
-  }
-}
-
-@Controller({
-  path: 'movie',
   // version: '1',
 })
 @UseInterceptors(ClassSerializerInterceptor)
