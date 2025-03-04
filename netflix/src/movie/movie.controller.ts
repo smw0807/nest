@@ -47,7 +47,7 @@ export class MovieV2Controller {
 
 @Controller({
   path: 'movie',
-  version: '1',
+  // version: '1',
 })
 @UseInterceptors(ClassSerializerInterceptor)
 export class MovieController {
@@ -63,7 +63,7 @@ export class MovieController {
     return this.movieService.findAll(dto, userId);
   }
 
-  @Version('5')
+  // @Version('5')
   @Get('recent')
   @UseInterceptors(CI)
   @CacheKey('getMoviesRecent')
