@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { readdir, unlink } from 'fs/promises';
@@ -8,18 +8,24 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class TaskService {
+  private readonly logger = new Logger(TaskService.name);
   constructor(
     @InjectRepository(Movie)
     private readonly movieRepository: Repository<Movie>,
     private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
 
-  // @Cron('* * * * * *')
+  // @Cron('*/5 * * * * *')
   logEverySecond() {
-    console.log('1초 마다 실행');
+    this.logger.fatal('1초 마다 실행');
+    this.logger.error('1초 마다 실행');
+    this.logger.warn('1초 마다 실행');
+    this.logger.log('1초 마다 실행');
+    this.logger.debug('1초 마다 실행');
+    this.logger.verbose('1초 마다 실행');
   }
 
-  // @Cron('* * * * * *')
+  @Cron('* * * * * *')
   async eraseOrphanFiles() {
     const files = await readdir(join(process.cwd(), 'public', 'temp'));
 
