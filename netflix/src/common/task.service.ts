@@ -10,14 +10,14 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class TaskService {
-  // private readonly logger = new Logger(TaskService.name);
+  private readonly logger = new Logger(TaskService.name);
   constructor(
     @InjectRepository(Movie)
     private readonly movieRepository: Repository<Movie>,
     private readonly schedulerRegistry: SchedulerRegistry,
     // private readonly logger: DefaultLogger,
-    @Inject(WINSTON_MODULE_NEST_PROVIDER)
-    private readonly logger: LoggerService,
+    // @Inject(WINSTON_MODULE_NEST_PROVIDER)
+    // private readonly logger: LoggerService,
   ) {}
 
   // @Cron('*/5 * * * * *')
