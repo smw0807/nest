@@ -11,6 +11,7 @@ import {
   ClassSerializerInterceptor,
   ParseIntPipe,
   UseGuards,
+  Version,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
@@ -30,7 +31,24 @@ import {
   CacheInterceptor as CI,
 } from '@nestjs/cache-manager';
 import { Throttle } from 'src/common/decorator/throttlw.decorator';
-@Controller('movie')
+
+@Controller({
+  path: 'movie',
+  version: ['2', '3'],
+})
+export class MovieV2Controller {
+  constructor(private readonly movieService: MovieService) {}
+
+  @Get()
+  getMovies(@Query() dto: GetMoviesDto, @UserId() userId?: number) {
+    return this.movieService.findAll(dto, userId);
+  }
+}
+
+@Controller({
+  path: 'movie',
+  version: '1',
+})
 @UseInterceptors(ClassSerializerInterceptor)
 export class MovieController {
   constructor(private readonly movieService: MovieService) {}
@@ -45,6 +63,7 @@ export class MovieController {
     return this.movieService.findAll(dto, userId);
   }
 
+  @Version('5')
   @Get('recent')
   @UseInterceptors(CI)
   @CacheKey('getMoviesRecent')
