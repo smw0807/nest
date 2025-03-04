@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, LoggerService } from '@nestjs/common';
 import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { readdir, unlink } from 'fs/promises';
@@ -6,6 +6,7 @@ import { join, parse } from 'path';
 import { Movie } from 'src/movie/entity/movie.entity';
 import { Repository } from 'typeorm';
 import { DefaultLogger } from './logger/default.logger';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class TaskService {
@@ -14,17 +15,19 @@ export class TaskService {
     @InjectRepository(Movie)
     private readonly movieRepository: Repository<Movie>,
     private readonly schedulerRegistry: SchedulerRegistry,
-    private readonly logger: DefaultLogger,
+    // private readonly logger: DefaultLogger,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER)
+    private readonly logger: LoggerService,
   ) {}
 
   // @Cron('*/5 * * * * *')
   logEverySecond() {
-    this.logger.fatal('1초 마다 실행');
-    this.logger.error('1초 마다 실행');
-    this.logger.warn('1초 마다 실행');
-    this.logger.log('1초 마다 실행');
-    this.logger.debug('1초 마다 실행');
-    this.logger.verbose('1초 마다 실행');
+    this.logger.fatal('1초 마다 실행', TaskService.name);
+    this.logger.error('1초 마다 실행', null, TaskService.name);
+    this.logger.warn('1초 마다 실행', TaskService.name);
+    this.logger.log('1초 마다 실행', TaskService.name);
+    this.logger.debug('1초 마다 실행', TaskService.name);
+    this.logger.verbose('1초 마다 실행', TaskService.name);
   }
 
   @Cron('* * * * * *')
