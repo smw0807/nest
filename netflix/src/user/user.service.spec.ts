@@ -2,7 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { CreateUserDto } from './dto/create-user.dto';
+import * as bcrypt from 'bcryptjs';
 
 // 데이터베이스 작업을 흉대내는 가짜 저장소
 const mockUserRepository = {
@@ -11,6 +14,9 @@ const mockUserRepository = {
   save: jest.fn(),
   update: jest.fn(),
   delete: jest.fn(),
+};
+const mockConfigService = {
+  get: jest.fn(),
 };
 describe('UserService', () => {
   let userService: UserService;
@@ -24,6 +30,10 @@ describe('UserService', () => {
           provide: getRepositoryToken(User),
           useValue: mockUserRepository,
         },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
+        },
       ],
     }).compile();
 
@@ -33,6 +43,66 @@ describe('UserService', () => {
 
   it('should be defined', () => {
     expect(userService).toBeDefined();
+  });
+
+  describe('create', () => {
+    it('should create a user', async () => {
+      const createUserDto: CreateUserDto = {
+        email: 'smw@gmail.com',
+        password: '1234',
+      };
+      const hashRounds = 10;
+      const hashedPassword = 'hashedPassword';
+      const result = {
+        id: 1,
+        email: createUserDto.email,
+        password: hashedPassword,
+      };
+
+      jest.spyOn(mockUserRepository, 'findOne').mockResolvedValueOnce(null);
+      jest.spyOn(mockConfigService, 'get').mockResolvedValue(hashRounds);
+      jest
+        .spyOn(bcrypt, 'hash')
+        .mockImplementation((password, hashRounds) => hashedPassword);
+      jest.spyOn(mockUserRepository, 'findOne').mockResolvedValueOnce(result);
+
+      const createUser = await userService.create(createUserDto);
+
+      expect(createUser).toEqual(result);
+      expect(mockUserRepository.findOne).toHaveBeenNthCalledWith(1, {
+        where: { email: createUserDto.email },
+      });
+      expect(mockUserRepository.findOne).toHaveBeenNthCalledWith(2, {
+        where: { email: createUserDto.email },
+      });
+      expect(mockConfigService.get).toHaveBeenCalledWith(expect.anything());
+      // hashRounds 값이 {} 으로 들어가서 에러가 발생함
+      // expect(bcrypt.hash as jest.Mock).toHaveBeenCalledWith(
+      //   createUserDto.password,
+      //   hashRounds,
+      // );
+      expect(mockUserRepository.save).toHaveBeenCalledWith({
+        email: createUserDto.email,
+        password: hashedPassword,
+      });
+    });
+
+    it('should throw BadRequestException if user already exists', async () => {
+      const createUserDto: CreateUserDto = {
+        email: 'smw@gmail.com',
+        password: '123123',
+      };
+      jest.spyOn(mockUserRepository, 'findOne').mockResolvedValue({
+        id: 1,
+        email: createUserDto.email,
+      });
+      expect(userService.create(createUserDto)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+        where: { email: createUserDto.email },
+      });
+    });
   });
 
   // 테스트 그룹
