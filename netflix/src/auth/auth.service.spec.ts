@@ -7,6 +7,7 @@ import { User } from 'src/user/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { BadRequestException } from '@nestjs/common';
 
 const mockUserRepository = {
   findOne: jest.fn(),
@@ -24,15 +25,6 @@ const mockCacheManager = {
 };
 const mockUserService = {
   create: jest.fn(),
-};
-const mockAuthService = {
-  blockToken: jest.fn(),
-  parseBasicToken: jest.fn(),
-  parseBearerToken: jest.fn(),
-  register: jest.fn(),
-  authenticate: jest.fn(),
-  issueToken: jest.fn(),
-  login: jest.fn(),
 };
 
 describe('AuthService', () => {
@@ -52,8 +44,8 @@ describe('AuthService', () => {
           useValue: mockUserRepository,
         },
         {
-          provide: AuthService,
-          useValue: mockAuthService,
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
         {
           provide: JwtService,
@@ -67,10 +59,6 @@ describe('AuthService', () => {
           provide: UserService,
           useValue: mockUserService,
         },
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
       ],
     }).compile();
 
@@ -82,7 +70,72 @@ describe('AuthService', () => {
     userService = module.get<UserService>(UserService);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should be defined', () => {
     expect(authService).toBeDefined();
+  });
+
+  describe('blockToken', () => {
+    it('should block a token', async () => {
+      const token = 'token';
+      const payload = {
+        exp: Math.floor(Date.now() / 1000) + 60,
+      };
+
+      jest.spyOn(jwtService, 'decode').mockReturnValue(payload);
+      await authService.blockToken(token);
+
+      expect(jwtService.decode).toHaveBeenCalledWith(token);
+      expect(cacheManager.set).toHaveBeenCalledWith(
+        `BLOCK_TOKEN_${token}`,
+        payload,
+        expect.any(Number),
+      );
+    });
+  });
+
+  describe('parseBasicToken', () => {
+    it('should parse a valid basic token', () => {
+      const rawToken = 'Basic c213QGdtYWlsLmNvbToxMjMxMjM=';
+      const result = authService.parseBasicToken(rawToken);
+
+      const decode = {
+        email: 'smw@gmail.com',
+        password: '123123',
+      };
+
+      expect(result).toEqual(decode);
+    });
+
+    it('should throw an error for split length', () => {
+      const rawToken = 'Basica';
+      expect(() => authService.parseBasicToken(rawToken)).toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw an error for invalid format', () => {
+      const rawToken = 'Basic InvalidFormat';
+      expect(() => authService.parseBasicToken(rawToken)).toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw an error for invalid basic token format', () => {
+      const rawToken = 'Bearer InvalidFormat';
+      expect(() => authService.parseBasicToken(rawToken)).toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw an error for invalid basic token format', () => {
+      const rawToken = 'Bearer a';
+      expect(() => authService.parseBasicToken(rawToken)).toThrow(
+        BadRequestException,
+      );
+    });
   });
 });
