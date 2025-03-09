@@ -6,6 +6,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcryptjs';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 // 데이터베이스 작업을 흉대내는 가짜 저장소
 const mockUserRepository = {
@@ -156,6 +157,63 @@ describe('UserService', () => {
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: 999 },
       });
+    });
+  });
+
+  describe('update', () => {
+    it('should update a user if it exists and return the updated user', async () => {
+      const updateUserDto: UpdateUserDto = {
+        email: 'smw@gmail.com',
+        password: '1234',
+      };
+      const hashRounds = 10;
+      const hashedPassword = 'hashedPassword';
+
+      const user = { id: 1, email: updateUserDto.email, password: '123123' };
+
+      jest.spyOn(mockUserRepository, 'findOne').mockResolvedValue(user);
+      jest.spyOn(mockConfigService, 'get').mockReturnValue(hashRounds);
+      jest
+        .spyOn(bcrypt, 'hash')
+        .mockImplementation((password, hashRounds) => hashedPassword);
+
+      jest.spyOn(mockUserRepository, 'update').mockResolvedValue(undefined);
+      jest.spyOn(mockUserRepository, 'findOne').mockResolvedValue({
+        ...user,
+        password: hashedPassword,
+      });
+
+      const result = await userService.update(1, updateUserDto);
+
+      expect(result).toEqual({ ...user, password: hashedPassword });
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      expect(bcrypt.hash).toHaveBeenCalledWith(
+        updateUserDto.password,
+        hashRounds,
+      );
+      expect(mockUserRepository.update).toHaveBeenCalledWith(1, {
+        ...updateUserDto,
+        password: hashedPassword,
+      });
+    });
+
+    it('should throw NotFoundException if user does not exist', async () => {
+      jest.spyOn(mockUserRepository, 'findOne').mockResolvedValue(null);
+
+      const updateUserDto: UpdateUserDto = {
+        email: 'smw@gmail.com',
+        password: '1234',
+      };
+
+      expect(userService.update(999, updateUserDto)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 999 },
+      });
+      expect(mockUserRepository.findOne).not.toHaveBeenCalledWith();
     });
   });
 
