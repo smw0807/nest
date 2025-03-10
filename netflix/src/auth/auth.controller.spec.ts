@@ -98,8 +98,8 @@ describe('AuthController', () => {
 
       const result = await authController.loginUserPassport(req);
       expect(authService.issueToken).toHaveBeenCalledTimes(2);
-      expect(authService.issueToken).toHaveBeenNthCalledWith(1, user, false);
-      expect(authService.issueToken).toHaveBeenNthCalledWith(2, user, true);
+      expect(authService.issueToken).toHaveBeenNthCalledWith(1, user, true);
+      expect(authService.issueToken).toHaveBeenNthCalledWith(2, user, false);
       expect(result).toEqual({
         accessToken,
         refreshToken,
