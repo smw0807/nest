@@ -56,9 +56,9 @@ export class AuthController {
     return this.authService.blockToken(token);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('private')
-  async private(@Request() req) {
-    return req.user;
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Get('private')
+  // async private(@Request() req) {
+  //   return req.user;
+  // }
 }
