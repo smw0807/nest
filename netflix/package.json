@@ -97,7 +97,11 @@
     "coveragePathIgnorePatterns": [
       "module.ts",
       "dto.ts",
-      "entity.ts"
+      "entity.ts",
+      "guard.ts",
+      "strategy.ts",
+      "decorator.ts",
+      "middleware.ts"
     ],
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
