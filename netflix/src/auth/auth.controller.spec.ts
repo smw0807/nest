@@ -72,7 +72,7 @@ describe('AuthController', () => {
     });
   });
 
-  describe('lotateAccessToken', () => {
+  describe('rotateAccessToken', () => {
     it('should rotate access token', async () => {
       const accessToken = 'mocked.access.token';
 
