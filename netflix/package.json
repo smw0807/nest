@@ -25,7 +25,9 @@
     "test:director": "jest --testPathPattern=src/director --coverage --collectCoverageFrom=src/director/**/*.ts",
     "test:director:watch": "jest --watch --testPathPattern=src/director --coverage --collectCoverageFrom=src/director/**/*.ts",
     "test:genre": "jest --testPathPattern=src/genre --coverage --collectCoverageFrom=src/genre/**/*.ts",
-    "test:genre:watch": "jest --watch --testPathPattern=src/genre --coverage --collectCoverageFrom=src/genre/**/*.ts"
+    "test:genre:watch": "jest --watch --testPathPattern=src/genre --coverage --collectCoverageFrom=src/genre/**/*.ts",
+    "test:movie": "jest --testPathPattern=src/movie --coverage --collectCoverageFrom=src/movie/**/*.ts",
+    "test:movie:watch": "jest --watch --testPathPattern=src/movie --coverage --collectCoverageFrom=src/movie/**/*.ts"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.0",
@@ -58,6 +60,8 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@automock/adapters.nestjs": "^2.1.0",
+    "@automock/jest": "^2.1.0",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
@@ -107,7 +111,9 @@
       "guard.ts",
       "strategy.ts",
       "decorator.ts",
-      "middleware.ts"
+      "middleware.ts",
+      "pipe.ts",
+      "common/*"
     ],
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
