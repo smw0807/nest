@@ -23,7 +23,9 @@
     "test:auth": "jest --testPathPattern=src/auth --coverage --collectCoverageFrom=src/auth/**/*.ts",
     "test:auth:watch": "jest --watch --testPathPattern=src/auth --coverage --collectCoverageFrom=src/auth/**/*.ts",
     "test:director": "jest --testPathPattern=src/director --coverage --collectCoverageFrom=src/director/**/*.ts",
-    "test:director:watch": "jest --watch --testPathPattern=src/director --coverage --collectCoverageFrom=src/director/**/*.ts"
+    "test:director:watch": "jest --watch --testPathPattern=src/director --coverage --collectCoverageFrom=src/director/**/*.ts",
+    "test:genre": "jest --testPathPattern=src/genre --coverage --collectCoverageFrom=src/genre/**/*.ts",
+    "test:genre:watch": "jest --watch --testPathPattern=src/genre --coverage --collectCoverageFrom=src/genre/**/*.ts"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.0",
@@ -88,7 +90,9 @@
       "json",
       "ts"
     ],
-    "roots": ["src"],
+    "roots": [
+      "src"
+    ],
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
