@@ -130,55 +130,135 @@ export class MovieService {
       nextCursor,
     };
   }
-
-  findOne(id: number) {
-    const movie = this.movieRepository
+  /* istanbul ignore next */
+  async findMovieDetail(id: number) {
+    return this.movieRepository
       .createQueryBuilder('movie')
       .leftJoinAndSelect('movie.detail', 'detail')
       .leftJoinAndSelect('movie.director', 'director')
       .leftJoinAndSelect('movie.genres', 'genres')
       .where('movie.id = :id', { id: id })
       .getOne();
+  }
+  async findOne(id: number) {
+    const movie = await this.findMovieDetail(id);
+    if (!movie) {
+      throw new NotFoundException('존재하지 않는 ID의 영화입니다.');
+    }
     return movie;
   }
 
-  async create(dto: CreateMovieDto, queryRunner: QueryRunner, userId: number) {
-    const { directorId, detail, genreIds, movieFileName, ...movieInfo } = dto;
-    const director = await queryRunner.manager.findOne(Director, {
-      where: { id: directorId },
+  /* istanbul ignore next */
+  async createMovieDetail(qr: QueryRunner, createMovieDto: CreateMovieDto) {
+    return qr.manager
+      .createQueryBuilder()
+      .insert()
+      .into(MovieDetail)
+      .values({
+        detail: createMovieDto.detail,
+      })
+      .execute();
+  }
+
+  /* istanbul ignore next */
+  createMovie(
+    qr: QueryRunner,
+    createMovieDto: CreateMovieDto,
+    director: Director,
+    movieDetailId: number,
+    userId: number,
+    movieFolder: string,
+  ) {
+    return qr.manager
+      .createQueryBuilder()
+      .insert()
+      .into(Movie)
+      .values({
+        name: createMovieDto.name,
+        detail: {
+          id: movieDetailId,
+        },
+        director,
+        creator: {
+          id: userId,
+        },
+        movieFilePath: join(movieFolder, createMovieDto.movieFileName),
+      })
+      .execute();
+  }
+
+  createMovieGenreRelation(qr: QueryRunner, movieId: number, genres: Genre[]) {
+    return qr.manager
+      .createQueryBuilder()
+      .relation(Movie, 'genres')
+      .of(movieId)
+      .add(genres.map((genre) => genre.id));
+  }
+
+  renameMovieFile(
+    tempFolder: string,
+    movieFolder: string,
+    createMovieDto: CreateMovieDto,
+  ) {
+    return rename(
+      join(process.cwd(), tempFolder, createMovieDto.movieFileName),
+      join(process.cwd(), movieFolder, createMovieDto.movieFileName),
+    );
+  }
+  async create(
+    createMovieDto: CreateMovieDto,
+    qr: QueryRunner,
+    userId: number,
+  ) {
+    const director = await qr.manager.findOne(Director, {
+      where: {
+        id: createMovieDto.directorId,
+      },
     });
+
     if (!director) {
-      throw new NotFoundException('존재하지 않는 ID의 감독입니다.');
+      throw new NotFoundException('존재하지 않는 ID의 감독입니다!');
     }
-    const genres = await queryRunner.manager.find(Genre, {
-      where: { id: In(genreIds) },
+
+    const genres = await qr.manager.find(Genre, {
+      where: {
+        id: In(createMovieDto.genreIds),
+      },
     });
-    if (genres.length !== genreIds.length) {
+
+    if (genres.length !== createMovieDto.genreIds.length) {
       throw new NotFoundException(
-        `존재하지 않는 장르가 있습니다. 존재하는 ids => ${genres.map((genre) => genre.id).join(',')}`,
+        `존재하지 않는 장르가 있습니다! 존재하는 ids -> ${genres.map((genre) => genre.id).join(',')}`,
       );
     }
+
+    const movieDetail = await this.createMovieDetail(qr, createMovieDto);
+
+    const movieDetailId = movieDetail.identifiers[0].id;
+
     const movieFolder = join('public', 'movie');
     const tempFolder = join('public', 'temp');
 
-    // cascade: true 옵션을 주면 영화 상세 정보를 생성할 때 영화 정보도 함께 생성된다.
-    const movie = await queryRunner.manager.save(Movie, {
-      ...movieInfo,
-      detail: {
-        detail: detail,
-      },
+    const movie = await this.createMovie(
+      qr,
+      createMovieDto,
       director,
-      genres,
-      movieFilePath: join(movieFolder, movieFileName),
-      creator: {
-        id: userId,
-      },
-    });
-    await rename(
-      join(process.cwd(), tempFolder, movieFileName),
-      join(process.cwd(), movieFolder, movieFileName),
+      movieDetailId,
+      userId,
+      movieFolder,
     );
-    return movie;
+
+    const movieId = movie.identifiers[0].id;
+
+    await this.createMovieGenreRelation(qr, movieId, genres);
+    await this.renameMovieFile(tempFolder, movieFolder, createMovieDto);
+
+    return await qr.manager.findOne(Movie, {
+      where: {
+        id: movieId,
+      },
+      relations: ['detail', 'director', 'genres'],
+    });
   }
 
   async update(id: number, dto: UpdateMovieDto) {
