@@ -10,7 +10,7 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { envVariableKeys } from 'src/common/constants/env.const';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UserService {
   constructor(
