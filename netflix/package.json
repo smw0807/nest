@@ -56,6 +56,7 @@
     "@types/passport-local": "^1.0.38",
     "aws-sdk": "^2.1691.0",
     "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
     "bullmq": "^5.13.2",
     "cache-manager": "^5.7.6",
     "class-transformer": "^0.5.1",
