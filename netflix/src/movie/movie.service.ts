@@ -169,6 +169,7 @@ export class MovieService {
     userId: number,
     movieFolder: string,
   ) {
+    console.log(createMovieDto);
     return qr.manager
       .createQueryBuilder()
       .insert()
@@ -182,6 +183,9 @@ export class MovieService {
         creator: {
           id: userId,
         },
+        rating: createMovieDto.rating,
+        year: createMovieDto.year,
+        actors: createMovieDto.actors,
         movieFilePath: join(movieFolder, createMovieDto.movieFileName),
       })
       .execute();
