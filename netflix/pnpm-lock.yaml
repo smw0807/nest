@@ -78,7 +78,7 @@ importers:
         specifier: ^1.0.38
         version: 1.0.38
       aws-sdk:
-        specifier: ^2.1691.0
+        specifier: ^2.1692.0
         version: 2.1692.0
       bcrypt:
         specifier: ^5.1.1
