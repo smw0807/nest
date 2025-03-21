@@ -66,11 +66,11 @@ import { ScheduleModule } from '@nestjs/schedule';
           configService.get<string>(envVariableKeys.env) === 'prod'
             ? false
             : true, // 개발 환경에서만 사용
-        ...(configService.get<string>(envVariableKeys.env) === 'prod' && {
-          ssl: {
-            rejectUnauthorized: false,
-          },
-        }),
+        // ...(configService.get<string>(envVariableKeys.env) === 'prod' && {
+        //   ssl: {
+        //     rejectUnauthorized: false,
+        //   },
+        // }),
       }),
       inject: [ConfigService],
     }),

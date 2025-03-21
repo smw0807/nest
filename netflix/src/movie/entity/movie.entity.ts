@@ -30,7 +30,11 @@ export class Movie extends BaseTable {
   name: string;
 
   @Column({ nullable: true })
-  @Transform(({ value }) => `http://localhost:3000/${value}`)
+  @Transform(({ value }) =>
+    process.env.NODE_ENV === 'prod'
+      ? `https://${process.env.BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${value}`
+      : `http://localhost:3000/${value}`,
+  )
   movieFilePath?: string;
 
   @Column({ type: 'decimal', precision: 3, scale: 1 })
