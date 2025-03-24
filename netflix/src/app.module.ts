@@ -30,6 +30,7 @@ import { MovieUserLike } from './movie/entity/movie-user-like.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ThrottleInterceptor } from './common/interceptor/throttle.interceptor';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -119,6 +120,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     GenreModule,
     AuthModule,
     UserModule,
+    ChatModule,
   ],
   controllers: [],
   providers: [

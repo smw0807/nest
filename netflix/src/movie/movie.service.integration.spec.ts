@@ -65,8 +65,6 @@ describe('MovieService - Integration Test', () => {
   });
 
   beforeEach(async () => {
-    await cacheManager.clear();
-
     const movieRepository = dataSource.getRepository(Movie);
     const movieDetailRepository = dataSource.getRepository(MovieDetail);
     const userRepository = dataSource.getRepository(User);
