@@ -9,6 +9,10 @@ import {
 import { ChatService } from './chat.service';
 import { Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
+import { UseInterceptors } from '@nestjs/common';
+import { WsTransactionInterceptor } from 'src/common/interceptor/ws-transaction.interceptor';
+import { WsQueryRunner } from 'src/common/decorator/ws-query-runner.decorator';
+import { QueryRunner } from 'typeorm';
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
@@ -23,6 +27,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const payload = await this.authService.parseBearerToken(rawToken, false);
       if (payload) {
         client.data.user = payload;
+        this.chatService.registerClient(payload.sub, client);
+        await this.chatService.joinUserRooms(payload, client);
       } else {
         client.disconnect();
       }
@@ -33,24 +39,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   handleDisconnect(client: Socket) {
-    return;
-  }
-
-  @SubscribeMessage('receiveMessage')
-  async receiveMessage(
-    @MessageBody() data: { message: string },
-    @ConnectedSocket() client: Socket, // 지금 연결된 클라이언트 소켓 객체
-  ) {
-    console.log('receiveMessage', data);
-    console.log('client', client);
-    client.emit('receiveMessage', { message: 'Hello, client!' });
+    const user = client.data.user;
+    if (user) {
+      this.chatService.removeClient(user.sub);
+    }
   }
 
   @SubscribeMessage('sendMessage')
-  async sendMessage(
-    @MessageBody() data: { message: string },
+  @UseInterceptors(WsTransactionInterceptor)
+  async handleMessage(
+    @MessageBody() body: { message: string },
     @ConnectedSocket() client: Socket,
-  ) {
-    client.emit('sendMessage', { ...data, from: 'server' });
-  }
+    @WsQueryRunner() qr: QueryRunner,
+  ) {}
 }
