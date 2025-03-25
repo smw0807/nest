@@ -138,7 +138,8 @@ export class AuthService {
       },
       {
         secret: isRefreshToken ? refreshTokenSecret : accessTokenSecret,
-        expiresIn: isRefreshToken ? '24h' : '5m',
+        // 테스트 환경에서는 토큰 만료시간을 1시간으로 설정
+        expiresIn: isRefreshToken ? '24h' : '1h',
       },
     );
   }
