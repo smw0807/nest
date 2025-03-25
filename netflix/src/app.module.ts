@@ -31,6 +31,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { ThrottleInterceptor } from './common/interceptor/throttle.interceptor';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ChatModule } from './chat/chat.module';
+import { Chat } from './chat/entity/chat.entity';
+import { ChatRoom } from './chat/entity/chat-room.entity';
 
 @Module({
   imports: [
@@ -62,7 +64,16 @@ import { ChatModule } from './chat/chat.module';
         username: configService.get<string>(envVariableKeys.dbUsername),
         password: configService.get<string>(envVariableKeys.dbPassword),
         database: configService.get<string>(envVariableKeys.dbDatabase),
-        entities: [Movie, MovieDetail, Director, Genre, User, MovieUserLike],
+        entities: [
+          Movie,
+          MovieDetail,
+          Director,
+          Genre,
+          User,
+          MovieUserLike,
+          Chat,
+          ChatRoom,
+        ],
         synchronize:
           configService.get<string>(envVariableKeys.env) === 'prod'
             ? false
