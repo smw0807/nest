@@ -9,7 +9,7 @@ import { DataSource, In, QueryRunner, Repository } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Genre } from 'src/genre/entities/genre.entity';
+import { Genre } from 'src/genre/entity/genre.entity';
 import { User } from 'src/user/entities/user.entity';
 import { MovieUserLike } from './entity/movie-user-like.entity';
 import { GetMoviesDto } from './dto/get-movies.dto';
