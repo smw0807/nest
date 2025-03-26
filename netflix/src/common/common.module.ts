@@ -9,6 +9,7 @@ import { TaskService } from './task.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Movie } from 'src/movie/entity/movie.entity';
 import { DefaultLogger } from './logger/default.logger';
+import { BullModule } from '@nestjs/bullmq';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Movie]),
@@ -24,6 +25,15 @@ import { DefaultLogger } from './logger/default.logger';
           cb(null, `${v4()}_${Date.now()}.${extension}`);
         },
       }),
+    }),
+    BullModule.forRoot({
+      connection: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
+    BullModule.registerQueue({
+      name: 'thumbnail-generation',
     }),
   ],
   controllers: [CommonController],
