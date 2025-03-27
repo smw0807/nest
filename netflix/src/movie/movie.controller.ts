@@ -12,6 +12,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Version,
+  Req,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
@@ -72,7 +73,14 @@ export class MovieController {
 
   @Public()
   @Get(':id')
-  getMovie(@Param('id', ParseIntPipe) id: number) {
+  getMovie(@Param('id', ParseIntPipe) id: number, @Req() request: any) {
+    const session = request.session;
+    const movieCount = session.movieCount ?? {};
+    request.session.movieCount = {
+      ...movieCount,
+      [id]: movieCount[id] ? movieCount[id] + 1 : 1,
+    };
+    console.log(session);
     return this.movieService.findOne(id);
   }
 
