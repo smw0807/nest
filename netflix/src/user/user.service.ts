@@ -12,6 +12,7 @@ import { envVariableKeys } from 'src/common/constants/env.const';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from 'src/common/prisma.service';
+import { Prisma } from '@prisma/client';
 @Injectable()
 export class UserService {
   constructor(
@@ -68,7 +69,12 @@ export class UserService {
   }
 
   findAll() {
-    return this.prisma.user.findMany();
+    return this.prisma.user.findMany({
+      omit: {
+        // 필드 제외
+        password: true,
+      },
+    });
     // return this.userRepository.find();
   }
 
@@ -96,18 +102,25 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('존재하지 않는 사용자입니다!');
     }
-    const hash = await bcrypt.hash(
-      password,
-      this.configService.get<number>(envVariableKeys.hashRounds),
-    );
+
+    let input: Prisma.UserUpdateInput = { ...updateUserDto };
+
+    if (password) {
+      const hash = await bcrypt.hash(
+        password,
+        this.configService.get<number>(envVariableKeys.hashRounds),
+      );
+      input = {
+        ...updateUserDto,
+        password: hash,
+      };
+    }
+
     await this.prisma.user.update({
       where: {
         id,
       },
-      data: {
-        ...updateUserDto,
-        password: hash,
-      },
+      data: input,
     });
     // await this.userRepository.update(id, {
     //   ...updateUserDto,
