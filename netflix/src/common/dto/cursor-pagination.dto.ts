@@ -25,7 +25,7 @@ export class CursorPaginationDto {
 
   @IsInt()
   @IsOptional()
-  take: number = 10;
+  take: number = 2;
 }
 /*
 select id, "likeCount", name from movie

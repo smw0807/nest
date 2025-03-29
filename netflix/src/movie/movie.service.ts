@@ -102,23 +102,58 @@ export class MovieService {
   }
 
   async findAll(dto: GetMoviesDto, userId?: number) {
-    const { name } = dto;
-    const query = await this.getMovies();
+    const { name, cursor, order, take } = dto;
 
-    if (name) {
-      query.where('movie.name LIKE :name', {
-        name: `%${name}%`,
-      });
-    }
-    const { nextCursor } =
-      await this.commonService.applyCursorPaginationParamsToQb(query, dto);
-    let [data, count] = await query.getManyAndCount();
+    const orderBy = order.map((field) => {
+      const [column, direction] = field.split('_');
+      return {
+        [column]: direction.toLocaleLowerCase(),,
+      }
+    })
+    // const query = await this.getMovies();
+
+    const movies = await this.prisma.movie.findMany({
+      where:  name ? {
+        name: { contains: name} 
+      } : {},
+      take: take + 1,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { id: parseInt(cursor) } : undefined,
+      orderBy,
+      include: {
+        genres: true,
+        director: true,
+      }
+    })
+    // if (name) {
+    //   query.where('movie.name LIKE :name', {
+    //     name: `%${name}%`,
+    //   });
+    // }
+    const hasNextPage = movies.length > take;
+    if (hasNextPage) movies.pop();
+
+    const nextCursor = hasNextPage ? movies[movies.length - 1].id.toString() : null;
+
+    // const { nextCursor } =
+    //   await this.commonService.applyCursorPaginationParamsToQb(query, dto);
+    // let [data, count] = await query.getManyAndCount();
 
     if (userId) {
-      const movieIds = data.map((movie) => movie.id);
+      const movieIds = movies.map((movie) => movie.id);
+      // const movieIds = data.map((movie) => movie.id);
 
-      const likedMovies =
-        movieIds.length < 1 ? [] : await this.getLikedMovies(movieIds, userId);
+      const likedMovies = movieIds.length < 1 ? [] : await this.prisma.movieUserLike.findMany({
+        where: {
+          movieId: { in: movieIds },
+          userId: userId,
+        },
+        include: {
+          movie: true,
+        }
+      })
+      // const likedMovies =
+      //   movieIds.length < 1 ? [] : await this.getLikedMovies(movieIds, userId);
 
       const likedMovieMap = likedMovies.reduce(
         (acc, next) => ({
@@ -128,17 +163,26 @@ export class MovieService {
         {},
       );
 
-      data = data.map((movie) => {
-        return {
+      return {
+        data: movies.map((movie) => ({
           ...movie,
-          likeStatus:
-            movie.id in likedMovieMap ? likedMovieMap[movie.id] : null,
-        };
-      });
+          likeStatus: movie.id in likedMovieMap ? likedMovieMap[movie.id] : null
+        })),
+        nextCursor,
+        hasNextPage
+      }
+
+    //   data = data.map((movie) => {
+    //     return {
+    //       ...movie,
+    //       likeStatus:
+    //         movie.id in likedMovieMap ? likedMovieMap[movie.id] : null,
+    //     };
+    //   });
     }
     return {
-      data,
-      count,
+      data: movies,
+      hasNextPage,
       nextCursor,
     };
   }
