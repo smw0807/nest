@@ -465,7 +465,7 @@ export class MovieService {
       }
       const { detail, directorId, genreIds, ...movieRest } = dto;
 
-      let movieUpdateParams: Prisma.MovieUpdateInput = {
+      const movieUpdateParams: Prisma.MovieUpdateInput = {
         ...movieRest,
       };
       if (directorId) {

@@ -20,7 +20,7 @@ import { UpdateMovieDto } from './dto/update-movie.dto';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
 import { Public } from 'src/auth/decorator/public.decorator';
 import { RBAC } from 'src/auth/decorator/rbac.decorator';
-import { Role } from 'src/user/entities/user.entity';
+// import { Role } from 'src/user/entities/user.entity';
 import { GetMoviesDto } from './dto/get-movies.dto';
 import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
 import { UserId } from 'src/user/decorator/user-id.decorator';
@@ -33,6 +33,7 @@ import {
 } from '@nestjs/cache-manager';
 import { Throttle } from 'src/common/decorator/throttlw.decorator';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Role } from '@prisma/client';
 
 @ApiBearerAuth()
 @Controller({
@@ -98,6 +99,7 @@ export class MovieController {
   }
 
   @RBAC(Role.admin)
+  @UseGuards(AuthGuard)
   @Patch(':id')
   patchMovie(
     @Param('id', ParseIntPipe) id: number,
@@ -107,6 +109,7 @@ export class MovieController {
   }
 
   @RBAC(Role.admin)
+  @UseGuards(AuthGuard)
   @Delete(':id')
   deleteMovie(@Param('id', ParseIntPipe) id: number) {
     return this.movieService.remove(id);
