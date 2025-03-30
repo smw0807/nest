@@ -34,6 +34,7 @@ import { ChatModule } from './chat/chat.module';
 import { Chat } from './chat/entity/chat.entity';
 import { ChatRoom } from './chat/entity/chat-room.entity';
 import { WorkerModule } from './worker/worker.module';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
@@ -56,8 +57,10 @@ import { WorkerModule } from './worker/worker.module';
         AWS_ACCESS_KEY_ID: Joi.string().required(),
         AWS_REGION: Joi.string().required(),
         BUCKET_NAME: Joi.string().required(),
+        MONGO_URI: Joi.string().required(),
       }),
     }),
+    MongooseModule.forRoot(process.env.MONGO_URI),
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         type: configService.get<string>(envVariableKeys.dbType) as 'postgres',

@@ -13,7 +13,7 @@ const awsAccessKeyId = 'AWS_ACCESS_KEY_ID';
 const awsRegion = 'AWS_REGION';
 const bucketName = 'BUCKET_NAME';
 const dbUrl = 'DB_URL';
-
+const mongoUri = 'MONGO_URI';
 export const envVariableKeys = {
   env,
   dbType,
@@ -30,4 +30,5 @@ export const envVariableKeys = {
   awsRegion,
   bucketName,
   dbUrl,
+  mongoUri,
 };
