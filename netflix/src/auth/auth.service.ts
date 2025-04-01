@@ -111,9 +111,14 @@ export class AuthService {
   }
 
   async authenticate(email: string, password: string) {
-    const user = await this.userModel.findOne({
-      email,
-    });
+    const user = await this.userModel.findOne(
+      {
+        email,
+      },
+      {
+        password: 1,
+      },
+    );
     // const user = await this.prisma.user.findUnique({
     //   where: {
     //     email,
