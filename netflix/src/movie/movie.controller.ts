@@ -8,10 +8,10 @@ import {
   Delete,
   Query,
   UseInterceptors,
-  ClassSerializerInterceptor,
-  ParseIntPipe,
+  // ClassSerializerInterceptor,
+  // ParseIntPipe,
   UseGuards,
-  Version,
+  // Version,
   Req,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
@@ -22,10 +22,10 @@ import { Public } from 'src/auth/decorator/public.decorator';
 import { RBAC } from 'src/auth/decorator/rbac.decorator';
 // import { Role } from 'src/user/entities/user.entity';
 import { GetMoviesDto } from './dto/get-movies.dto';
-import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
+// import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
 import { UserId } from 'src/user/decorator/user-id.decorator';
-import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
-import { QueryRunner as QR } from 'typeorm';
+// import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
+// import { QueryRunner as QR } from 'typeorm';
 import {
   CacheKey,
   CacheTTL,
@@ -40,7 +40,7 @@ import { Role } from '@prisma/client';
   path: 'movie',
   // version: '1',
 })
-@UseInterceptors(ClassSerializerInterceptor)
+// @UseInterceptors(ClassSerializerInterceptor)
 export class MovieController {
   constructor(private readonly movieService: MovieService) {}
 
@@ -74,7 +74,7 @@ export class MovieController {
 
   @Public()
   @Get(':id')
-  getMovie(@Param('id', ParseIntPipe) id: number, @Req() request: any) {
+  getMovie(@Param('id') id: string, @Req() request: any) {
     const session = request.session;
     const movieCount = session.movieCount ?? {};
     request.session.movieCount = {
@@ -101,33 +101,24 @@ export class MovieController {
   @RBAC(Role.admin)
   @UseGuards(AuthGuard)
   @Patch(':id')
-  patchMovie(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() movie: UpdateMovieDto,
-  ) {
+  patchMovie(@Param('id') id: string, @Body() movie: UpdateMovieDto) {
     return this.movieService.update(id, movie);
   }
 
   @RBAC(Role.admin)
   @UseGuards(AuthGuard)
   @Delete(':id')
-  deleteMovie(@Param('id', ParseIntPipe) id: number) {
+  deleteMovie(@Param('id') id: string) {
     return this.movieService.remove(id);
   }
 
   @Post(':id/like')
-  createMovieLike(
-    @Param('id', ParseIntPipe) movieId: number,
-    @UserId() userId: number,
-  ) {
+  createMovieLike(@Param('id') movieId: string, @UserId() userId: number) {
     return this.movieService.toggleMovieLike(movieId, userId, true);
   }
 
   @Post(':id/dislike')
-  createMovieDislike(
-    @Param('id', ParseIntPipe) movieId: number,
-    @UserId() userId: number,
-  ) {
+  createMovieDislike(@Param('id') movieId: string, @UserId() userId: number) {
     return this.movieService.toggleMovieLike(movieId, userId, false);
   }
 }

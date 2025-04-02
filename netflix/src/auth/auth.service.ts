@@ -117,6 +117,7 @@ export class AuthService {
       },
       {
         password: 1,
+        role: 1,
       },
     );
     // const user = await this.prisma.user.findUnique({

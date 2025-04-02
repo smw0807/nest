@@ -1,6 +1,7 @@
 import {
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -94,6 +95,12 @@ export class MovieService {
       .find()
       .sort({ createdAt: -1 })
       .limit(10)
+      .populate('detail')
+      .populate('director')
+      .populate({
+        path: 'genres',
+        model: 'Genre',
+      })
       .exec();
     // const data = await this.prisma.movie.findMany({
     //   orderBy: {
@@ -137,6 +144,11 @@ export class MovieService {
 
     const orderBy = order.reduce((acc, field) => {
       const [column, direction] = field.split('_');
+      if (column === 'id') {
+        acc['_id'] = direction.toLowerCase();
+      } else {
+        acc[column] = direction.toLowerCase();
+      }
       acc[column] = direction.toLowerCase();
       return acc;
     }, {});
@@ -154,7 +166,7 @@ export class MovieService {
       .limit(take + 1);
 
     if (cursor) {
-      query.skip(1).gt('_id', new Types.ObjectId(cursor));
+      query.lt('_id', new Types.ObjectId(cursor));
     }
 
     const movies = await query.populate('genres director').exec();
@@ -199,9 +211,9 @@ export class MovieService {
           : await this.movieUserLikeModel
               .find({
                 movie: {
-                  $in: movieIds,
+                  $in: movieIds.map((id) => new Types.ObjectId(id.toString())),
                 },
-                user: userId,
+                user: new Types.ObjectId(userId.toString()),
               })
               .populate('movie')
               .exec();
@@ -272,7 +284,7 @@ export class MovieService {
     //   .where('movie.id = :id', { id: id })
     //   .getOne();
   }
-  async findOne(id: number) {
+  async findOne(id: string) {
     const movie = await this.movieModel.findById(id).exec();
     // const movie = await this.prisma.movie.findUnique({
     //   where: {
@@ -356,8 +368,8 @@ export class MovieService {
   }
 
   async create(createMovieDto: CreateMovieDto, userId: number) {
-    const session = await this.movieModel.startSession();
-    session.startTransaction();
+    // const session = await this.movieModel.startSession();
+    // session.startTransaction();
     try {
       const director = await this.directorModel
         .findById(createMovieDto.directorId)
@@ -381,33 +393,44 @@ export class MovieService {
             detail: createMovieDto.detail,
           },
         ],
-        {
-          session,
-        },
+        // {
+        //   session,
+        // },
       );
 
-      const movie = await this.movieModel.create([
-        {
-          name: createMovieDto.name,
-          movieFilePath: createMovieDto.movieFileName,
-          creator: userId,
-          director: director._id,
-          genres: genres.map((genre) => genre._id),
-          detail: movieDetail[0]._id,
-        },
-      ]);
+      const movie = await this.movieModel.create(
+        [
+          {
+            name: createMovieDto.name,
+            movieFilePath: createMovieDto.movieFileName,
+            creator: userId,
+            director: director._id,
+            genres: genres.map((genre) => genre._id),
+            detail: movieDetail[0]._id,
+          },
+        ],
+        // {
+        //   session,
+        // },
+      );
 
-      await session.commitTransaction();
+      // await session.commitTransaction();
 
       return this.movieModel
         .findById(movie[0]._id)
-        .populate('detail director genre')
+        .populate('detail')
+        .populate('director')
+        .populate({
+          path: 'genres',
+          model: 'Genre',
+        })
         .exec();
     } catch (error) {
       console.error(error);
-      await session.abortTransaction();
+      // await session.abortTransaction();
+      throw new InternalServerErrorException('트랜젝선 실패');
     } finally {
-      session.endSession();
+      // session.endSession();
     }
     // return this.prisma.$transaction(async (prisma) => {
     //   const director = await prisma.director.findUnique({
@@ -569,9 +592,9 @@ export class MovieService {
     //   );
   }
 
-  async update(id: number, dto: UpdateMovieDto) {
-    const session = await this.movieModel.startSession();
-    session.startTransaction();
+  async update(id: string, dto: UpdateMovieDto) {
+    // const session = await this.movieModel.startSession();
+    // session.startTransaction();
     try {
       const movie = await this.movieModel
         .findById(id)
@@ -621,7 +644,7 @@ export class MovieService {
 
       await this.movieModel.findByIdAndUpdate(id, movieUpdateParams);
 
-      await session.commitTransaction();
+      // await session.commitTransaction();
 
       return this.movieModel
         .findById(id)
@@ -633,9 +656,9 @@ export class MovieService {
         .exec();
     } catch (error) {
       console.error(error);
-      await session.abortTransaction();
+      // await session.abortTransaction();
     } finally {
-      session.endSession();
+      // session.endSession();
     }
     // return this.prisma.$transaction(async (prisma) => {
     //   const movie = await prisma.movie.findUnique({
@@ -785,7 +808,7 @@ export class MovieService {
     //   .where('id = :id', { id })
     //   .execute();
   }
-  async remove(id: number) {
+  async remove(id: string) {
     const movie = await this.movieModel.findById(id).populate('detail').exec();
     // const movie = await this.prisma.movie.findUnique({
     //   where: { id },
@@ -824,7 +847,7 @@ export class MovieService {
     //   .getOne();
   }
 
-  async toggleMovieLike(movieId: number, userId: number, isLike: boolean) {
+  async toggleMovieLike(movieId: string, userId: number, isLike: boolean) {
     const movie = await this.movieModel.findById(movieId).exec();
     // const movie = await this.prisma.movie.findUnique({
     //   where: {
@@ -855,8 +878,8 @@ export class MovieService {
     }
 
     const likeRecord = await this.movieUserLikeModel.findOne({
-      movie: movieId,
-      user: userId,
+      movie: new Types.ObjectId(movieId),
+      user: new Types.ObjectId(userId),
     });
     // const likeRecord = await this.prisma.movieUserLike.findUnique({
     //   where: {
@@ -870,8 +893,8 @@ export class MovieService {
 
     if (!likeRecord) {
       await this.movieUserLikeModel.create({
-        movie: movieId,
-        user: userId,
+        movie: new Types.ObjectId(movieId),
+        user: new Types.ObjectId(userId),
         isLike,
       });
       // await this.prisma.movieUserLike.create({
@@ -938,8 +961,8 @@ export class MovieService {
     }
 
     const result = await this.movieUserLikeModel.findOne({
-      movie: movieId,
-      user: userId,
+      movie: new Types.ObjectId(movieId),
+      user: new Types.ObjectId(userId),
     });
     // const result = await this.prisma.movieUserLike.findUnique({
     //   where: {
